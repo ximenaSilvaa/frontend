@@ -1,0 +1,228 @@
+//
+//  ScreenUserRegistration.swift
+//  TemplateReto451
+//
+//  Created by José Molina on 26/08/25.
+//
+
+import SwiftUI
+
+struct ScreenUserRegistration: View {
+    @Environment(\.authenticationController) var authenticationController
+    @Environment(\.dismiss) private var dismiss
+    @State private var errors: [String] = []
+    @State private var userForm = UserForm()
+    @State private var acceptTerms = false
+    @State private var showTerms = false
+
+    func register() async {
+        do {
+            let response = try await authenticationController.registerUser(name: userForm.name, email: userForm.email, password: userForm.password)
+        }
+        catch {
+            print("Error al realizar el registro")
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color.white
+                    .ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 30) {
+                        // Back Button and Title
+                        HStack {
+                            Button(action: {
+                                dismiss()
+                            }) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 18, weight: .medium))
+                                    .foregroundColor(.black)
+                            }
+
+                            Spacer()
+
+                            Text("Crear Cuenta")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.black)
+
+                            Spacer()
+
+                            // Invisible spacer for balance
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 18, weight: .medium))
+                                .opacity(0)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 10)
+
+                        // Form Fields
+                        VStack(spacing: 20) {
+                            // Full Name Field
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Nombre Completo")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.black)
+
+                                TextField("Ej. Papa Francisco", text: $userForm.name)
+                                    .textFieldStyle(PlainTextFieldStyle())
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(Color.gray.opacity(0.1))
+                                    .cornerRadius(8)
+                            }
+
+                            // Email Field
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Correo Electrónico")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.black)
+
+                                TextField("ejemplo@email.com", text: $userForm.email)
+                                    .textFieldStyle(PlainTextFieldStyle())
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(Color.gray.opacity(0.1))
+                                    .cornerRadius(8)
+                                    .autocapitalization(.none)
+                                    .keyboardType(.emailAddress)
+                            }
+
+                            // Password Field
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Contraseña")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.black)
+
+                                SecureFieldWithToggle(placeholder: "Contraseña", text: $userForm.password)
+                            }
+
+                            // Confirm Password Field
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Confirmar Contraseña")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.black)
+
+                                SecureFieldWithToggle(placeholder: "Contraseña", text: $userForm.confirmPassword)
+                            }
+                        }
+                        .padding(.horizontal, 32)
+
+                        // Terms and Conditions
+                        HStack(spacing: 12) {
+                            Button(action: {
+                                acceptTerms.toggle()
+                            }) {
+                                Image(systemName: acceptTerms ? "checkmark.square.fill" : "square")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(acceptTerms ? .blue : .gray)
+                            }
+
+                            HStack(spacing: 4) {
+                                Text("Acepto los")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.black)
+
+                                Button(action: {
+                                    showTerms = true
+                                }) {
+                                    Text("Términos y Condiciones")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(.blue)
+                                        .underline()
+                                }
+                            }
+
+                            Spacer()
+                        }
+                        .padding(.horizontal, 32)
+
+                        // Create Account Button
+                        Button(action: {
+                            errors = userForm.validate()
+                            if !acceptTerms {
+                                errors.append("Debes aceptar los términos y condiciones")
+                            }
+                            print(errors)
+                            if errors.isEmpty {
+                                Task {
+                                    await register()
+                                }
+                            }
+                        }) {
+                            Text("Crear Cuenta")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(Color.blue)
+                                .cornerRadius(25)
+                        }
+                        .padding(.horizontal, 32)
+
+                        // Error Summary
+                        if !errors.isEmpty {
+                            ComponentErrorSummary(errors: errors)
+                        }
+
+                        // Bottom spacing for keyboard
+                        Spacer(minLength: 60)
+
+                        // Bottom Logo
+                        Image("app-logo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 120, height: 120)
+                            .padding(.bottom, 30)
+                    }
+                }
+                .scrollDismissesKeyboard(.interactively)
+            }
+        }
+        .navigationBarHidden(true)
+        .sheet(isPresented: $showTerms) {
+            TermsAndConditionsScreen()
+        }
+    }
+}
+
+extension ScreenUserRegistration {
+    private struct UserForm{
+        var name: String = ""
+        var email: String = ""
+        var password: String = ""
+        var confirmPassword: String = ""
+
+        func validate() -> [String] {
+            var errors:[String] = []
+            if name.isEmptyOrWhitespace{
+                errors.append("El nombre es requerido")
+            }
+            if email.isEmptyOrWhitespace{
+                    errors.append("El correo es requerido")
+                }
+            if password.isEmptyOrWhitespace{
+                    errors.append("La contraseña es requerida")
+                }
+            if confirmPassword.isEmptyOrWhitespace{
+                    errors.append("La confirmación de contraseña es requerida")
+                }
+            if !email.isValidEmail{
+                    errors.append("Correo no es válido")
+                }
+            if !password.isValidPassword{
+                    errors.append("Contraseña no es válida")
+                }
+            if password != confirmPassword {
+                    errors.append("Las contraseñas no coinciden")
+                }
+            return errors
+        }
+    }
+}
+
+#Preview {
+    ScreenUserRegistration()
+}
