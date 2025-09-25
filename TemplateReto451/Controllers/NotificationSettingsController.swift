@@ -8,21 +8,10 @@ import Foundation
 
 class NotificationSettingsController: ObservableObject {
     // Establecer de la bd
-    @Published var isPaused: Bool = false
     @Published var isActivated: Bool = true
     @Published var isReactionsEnabled: Bool = true
     @Published var isReviewEnabled: Bool = true
     @Published var isReportsEnabled: Bool = true
-
-    func setPaused(_ value: Bool) {
-        isPaused = value
-        if value {
-            isReactionsEnabled = false
-            isReviewEnabled = false
-            isReportsEnabled = false
-            isActivated = false
-        }
-    }
 
     func setActivated(_ value: Bool) {
         isActivated = value
@@ -30,15 +19,15 @@ class NotificationSettingsController: ObservableObject {
             isReactionsEnabled = true
             isReviewEnabled = true
             isReportsEnabled = true
-            isPaused = false
+        } else {
+            isReactionsEnabled = false
+            isReviewEnabled = false
+            isReportsEnabled = false
         }
     }
-
-    func updateStatesFromIndividualToggles() {
+    
+    func updateState() {
         let allOn = isReactionsEnabled && isReviewEnabled && isReportsEnabled
-        let allOff = !isReactionsEnabled && !isReviewEnabled && !isReportsEnabled
-
         isActivated = allOn
-        isPaused = allOff
     }
 }

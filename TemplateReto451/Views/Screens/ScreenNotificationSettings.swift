@@ -42,15 +42,7 @@ struct ScreenNotificationSettings: View {
                 }
                 
                 // Usamos métodos seguros para cambiar el estado
-                sectionToggle(
-                    icon: "bell",
-                    text: "Pausar todas",
-                    isOn: Binding(
-                        get: { nsc.isPaused },
-                        set: { nsc.setPaused($0) }
-                    )
-                )
-                
+    
                 sectionToggle(
                     icon: "bell",
                     text: "Activar todas",
@@ -73,7 +65,7 @@ struct ScreenNotificationSettings: View {
                         get: { nsc.isReactionsEnabled },
                         set: {
                             nsc.isReactionsEnabled = $0
-                            nsc.updateStatesFromIndividualToggles()
+                            nsc.updateState()
                         }
                     )
                 )
@@ -91,7 +83,7 @@ struct ScreenNotificationSettings: View {
                         get: { nsc.isReviewEnabled },
                         set: {
                             nsc.isReviewEnabled = $0
-                            nsc.updateStatesFromIndividualToggles()
+                            nsc.updateState()
                         }
                     )
                 )
@@ -109,7 +101,7 @@ struct ScreenNotificationSettings: View {
                         get: { nsc.isReportsEnabled },
                         set: {
                             nsc.isReportsEnabled = $0
-                            nsc.updateStatesFromIndividualToggles()
+                            nsc.updateState()
                         }
                     )
                 )
