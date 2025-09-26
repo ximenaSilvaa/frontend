@@ -31,9 +31,7 @@ struct ComponentNavbar: View {
             }
 
             NavigationStack {
-                Text("Estadísticas")
-                    .font(.title)
-                    .foregroundColor(.gray)
+                DashboardScreen()
             }
             .tabItem {
                 Label("Estadísticas", systemImage: "chart.bar")
