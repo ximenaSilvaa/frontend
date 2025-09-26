@@ -15,19 +15,19 @@ struct HomeScreen: View {
     
     let reports = [
         (
-            user: "AnaTrailera300",
-            user_image: Image(systemName: "person.circle"),
+            user: "AnaTellez",
+            user_image: Image("userprofile"),
             title: "Estafa Venta de Coches",
-            description: "El sitio detectado simula ser una página de compraventa de automóviles bla bla bla ...",
-            report_image: Image(systemName: "photo"),
+            description: "El sitio detectado simula ser una página de compraventa de automóviles seminuevos, utilizando fotografías tomadas de portales legítimos para aparentar confiabilidad. La modalidad del fraude consiste en que los supuestos vendedores solicitan de manera insistente el pago anticipado del 50% del valor del automóvil, alegando que dicho anticipo es indispensable para \"asegurar la reserva\" o \"cubrir los gastos de envío a domicilio\".",
+            report_image: Image("reporsample"),
             category: "Electrodomésticos"
         ),
         (
             user: "JuanPérez",
-            user_image: Image(systemName: "person.circle.fill"),
+            user_image: Image("userprofile2"),
             title: "Alerta de Fraude",
-            description: "Página que te estafa <:",
-            report_image: Image(systemName: "photo"),
+            description: "Página fraudulenta que busca engañar a los usuarios haciéndose pasar por un sitio legítimo. Solicita datos personales, información bancaria y hasta pagos por adelantado con la promesa de servicios o productos que nunca se entregan. El sitio utiliza mensajes de urgencia y promociones falsas para presionar a las personas y lograr que compartan su información sensible. Se recomienda no proporcionar ningún dato ni realizar transferencias, ya que todo es parte de un esquema de estafa.",
+            report_image: Image("reporsample2"),
             category: "Muebles"
         )
     ]

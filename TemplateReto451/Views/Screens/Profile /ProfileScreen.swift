@@ -114,8 +114,7 @@ struct ProfileScreen: View {
                     user: userProfile.username,
                     user_image: userProfile.profileImage,
                     title: "Estafa venta Coches.com",
-                    description: "El sitio detectado simula ser una página de compraventa de automóviles seminuevos, utilizando fotografías tomadas de portales legítimos para aparentar confiabilidad. La modalidad del"
-                )
+                    description: "El sitio detectado simula ser una página de compraventa de automóviles seminuevos, utilizando fotografías tomadas de portales legítimos para aparentar confiabilidad. La modalidad del fraude consiste en que los supuestos vendedores solicitan de manera insistente el pago anticipado del 50% del valor del automóvil, alegando que dicho anticipo es indispensable para \"asegurar la reserva\" o \"cubrir los gastos de envío a domicilio\".",                )
                 .padding(.horizontal)
 
                 Spacer()

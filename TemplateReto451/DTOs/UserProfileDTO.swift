@@ -29,7 +29,7 @@ extension UserProfileDTO {
         name: "Ana Sánchez Ramos",
         location: "Ciudad de México, México",
         email: "ana@gmail.com",
-        profileImage: Image(systemName: "person.circle.fill"),
+        profileImage: Image("userprofile"),
         stats: ProfileStats(
             reports: 3,
             protectedPeople: 2,

@@ -59,7 +59,7 @@ struct ComponentReportSmall: View {
                 user_image: user_image,
                 title: title,
                 description: description,
-                report_image: Image(systemName: "photo"),
+                report_image: Image("reporsample"),
                 url: "https://tevoyaestafar.com/coches"
             )) {
                 Text("Mostrar más")
@@ -79,10 +79,10 @@ struct ComponentReportSmall_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             ComponentReportSmall(
-                user: "AnaTrailera300",
-                user_image: Image(systemName: "person.circle"),
+                user: "AnaTellez300",
+                user_image: Image("userprofile"),
                 title: "Estafa venta Coches.com",
-                description: "El sitio detectado simula ser una página de compraventa de automóviles seminuevos, utilizando fotografías tomadas de portales legítimos para aparentar confiabilidad. La modalidad del"
+                description: "El sitio detectado simula ser una página de compraventa de automóviles seminuevos, utilizando fotografías tomadas de portales legítimos para aparentar confiabilidad. La modalidad del fraude consiste en que los supuestos vendedores solicitan de manera insistente el pago anticipado del 50% del valor del automóvil, alegando que dicho anticipo es indispensable para \"asegurar la reserva\" o \"cubrir los gastos de envío a domicilio\".",
             )
         }
         .previewLayout(.sizeThatFits)
