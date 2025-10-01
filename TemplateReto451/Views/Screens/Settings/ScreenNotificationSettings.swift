@@ -21,7 +21,7 @@ struct ScreenNotificationSettings: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.title2)
-                            .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                            .foregroundColor(Color.brandPrimary)
                     }
                     .padding(.leading)
 
@@ -30,7 +30,7 @@ struct ScreenNotificationSettings: View {
                     Text("Notificaciones")
                         .font(.title)
                         .bold()
-                        .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                        .foregroundColor(Color.brandPrimary)
 
                     Spacer()
 
@@ -55,7 +55,7 @@ struct ScreenNotificationSettings: View {
                 Text("Comunidad")
                     .font(.title2)
                     .bold()
-                    .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                    .foregroundColor(Color.brandPrimary)
                     .padding(.horizontal)
                 
                 sectionToggle(
@@ -73,7 +73,7 @@ struct ScreenNotificationSettings: View {
                 Text("Mis reportes")
                     .font(.title2)
                     .bold()
-                    .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                    .foregroundColor(Color.brandPrimary)
                     .padding(.horizontal)
                 
                 sectionToggle(
@@ -91,7 +91,7 @@ struct ScreenNotificationSettings: View {
                 Text("Reportes recomendados")
                     .font(.title2)
                     .bold()
-                    .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                    .foregroundColor(Color.brandPrimary)
                     .padding(.horizontal)
                 
                 sectionToggle(
@@ -116,12 +116,12 @@ struct ScreenNotificationSettings: View {
     private func sectionToggle(icon: String, text: String, isOn: Binding<Bool>) -> some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.blue)
+                .foregroundColor(Color.brandAccent)
             Text(text)
             Spacer()
             Toggle("", isOn: isOn)
                 .labelsHidden()
-                .toggleStyle(SwitchToggleStyle(tint: .blue))
+                .toggleStyle(SwitchToggleStyle(tint: Color.brandAccent))
         }
         .padding(.horizontal)
     }

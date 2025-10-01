@@ -24,7 +24,7 @@ struct NotificationRowComponent: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(notification.title)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(.brandPrimary)
                         .multilineTextAlignment(.leading)
 
                     if let description = notification.description {
@@ -46,7 +46,11 @@ struct NotificationRowComponent: View {
             .padding(.vertical, 12)
             .background(Color.white)
             .cornerRadius(12)
-            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+            .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.brandSecondary.opacity(0.1), lineWidth: 1)
+            )
         }
         .buttonStyle(PlainButtonStyle())
     }

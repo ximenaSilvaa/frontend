@@ -39,15 +39,24 @@ struct HomeScreen: View {
             
             HStack {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
-                TextField("Buscar", text: $searchText)
+                    .foregroundColor(.brandSecondary)
+                    .font(.system(size: 16, weight: .medium))
+                TextField("Buscar reportes...", text: $searchText)
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.brandPrimary)
             }
-            .padding(8)
-            .background(Color(.systemGray5))
-            .cornerRadius(15)
-            .padding(.horizontal)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(Color.white)
+            .cornerRadius(20)
+            .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.brandSecondary.opacity(0.2), lineWidth: 1.5)
+            )
+            .padding(.horizontal, 20)
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {

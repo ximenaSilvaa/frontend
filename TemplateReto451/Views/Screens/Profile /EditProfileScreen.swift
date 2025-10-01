@@ -26,7 +26,7 @@ struct EditProfileScreen: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.title2)
-                            .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                            .foregroundColor(Color.brandPrimary)
                     }
                     .padding(.leading)
 
@@ -35,7 +35,7 @@ struct EditProfileScreen: View {
                     Text("Editar perfil")
                         .font(.title2)
                         .bold()
-                        .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                        .foregroundColor(Color.brandPrimary)
 
                     Spacer()
 
@@ -53,11 +53,11 @@ struct EditProfileScreen: View {
                         .resizable()
                         .frame(width: 80, height: 80)
                         .clipShape(Circle())
-                        .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                        .foregroundColor(Color.brandPrimary)
 
                     Text("Editar foto")
                         .font(.subheadline)
-                        .foregroundColor(.blue)
+                        .foregroundColor(Color.brandAccent)
                 }
                 .padding(.bottom, 20)
 
@@ -70,7 +70,15 @@ struct EditProfileScreen: View {
                             .foregroundColor(.gray)
 
                         TextField("", text: $editedName)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 14)
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.brandSecondary.opacity(0.3), lineWidth: 1.5)
+                            )
                             .font(.body)
                     }
 
@@ -83,7 +91,15 @@ struct EditProfileScreen: View {
                             .foregroundColor(.gray)
 
                         TextField("", text: $editedUsername)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 14)
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.brandSecondary.opacity(0.3), lineWidth: 1.5)
+                            )
                             .font(.body)
                     }
 
@@ -96,7 +112,15 @@ struct EditProfileScreen: View {
                             .foregroundColor(.gray)
 
                         TextField("", text: $editedEmail)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 14)
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.brandSecondary.opacity(0.3), lineWidth: 1.5)
+                            )
                             .font(.body)
                             .keyboardType(.emailAddress)
                             .autocapitalization(.none)
@@ -130,8 +154,9 @@ struct EditProfileScreen: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(Color.blue)
+                        .background(Color.brandAccent)
                         .cornerRadius(25)
+                        .shadow(color: Color.brandAccent.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 30)

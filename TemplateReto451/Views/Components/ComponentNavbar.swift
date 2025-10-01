@@ -54,9 +54,9 @@ struct ComponentNavbar: View {
             // Set clean white/light gray background
             appearance.backgroundColor = UIColor.systemBackground
             
-            // Selected item color (blue accent)
-            appearance.stackedLayoutAppearance.selected.iconColor = UIColor.systemBlue
-            appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.systemBlue]
+            // Selected item color (brand primary)
+            appearance.stackedLayoutAppearance.selected.iconColor = UIColor(red: 27/255, green: 54/255, blue: 93/255, alpha: 1.0)
+            appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(red: 27/255, green: 54/255, blue: 93/255, alpha: 1.0)]
             
             // Unselected item color (gray)
             appearance.stackedLayoutAppearance.normal.iconColor = UIColor.systemGray

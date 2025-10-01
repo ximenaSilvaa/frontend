@@ -57,7 +57,7 @@ struct LogrosScreen: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.title2)
-                            .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                            .foregroundColor(Color.brandPrimary)
                     }
                     .padding(.leading)
 
@@ -92,7 +92,7 @@ struct LogrosScreen: View {
                     Text("Logros")
                         .font(.largeTitle)
                         .bold()
-                        .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                        .foregroundColor(Color.brandPrimary)
                     Spacer()
                 }
                 .padding(.horizontal, 20)
@@ -161,7 +161,7 @@ struct LogrosScreen: View {
                     Text("Progreso")
                         .font(.title)
                         .bold()
-                        .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                        .foregroundColor(Color.brandPrimary)
 
                     Spacer()
 
@@ -191,14 +191,14 @@ struct LogrosScreen: View {
                         Text("Progreso")
                             .font(.largeTitle)
                             .bold()
-                            .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                            .foregroundColor(Color.brandPrimary)
 
                         Spacer()
 
                         Text("2025")
                             .font(.largeTitle)
                             .bold()
-                            .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                            .foregroundColor(Color.brandPrimary)
                     }
                     .padding(.horizontal)
                     .padding(.top, 60)
@@ -211,7 +211,7 @@ struct LogrosScreen: View {
                         }) {
                             Text(period.rawValue)
                                 .font(.headline)
-                                .foregroundColor(selectedPeriod == period ? Color(red: 4/255, green: 9/255, blue: 69/255) : .gray)
+                                .foregroundColor(selectedPeriod == period ? Color.brandPrimary : .gray)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
                                 .background(

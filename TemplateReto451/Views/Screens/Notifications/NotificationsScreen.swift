@@ -18,7 +18,7 @@ struct NotificationsScreen: View {
                 // Title
                 Text("Notificaciones")
                     .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(.brandPrimary)
                     .padding(.top, 20)
 
                 // Filter Tabs
@@ -91,29 +91,6 @@ struct NotificationsScreen: View {
     }
 }
 
-struct FilterTab: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(isSelected ? .black : .gray)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(
-                    isSelected ? Color.white : Color.clear
-                )
-                .cornerRadius(20)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                )
-        }
-    }
-}
 
 struct NotificationGroupSection: View {
     let title: String
@@ -125,7 +102,7 @@ struct NotificationGroupSection: View {
             HStack {
                 Text(title)
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(.brandPrimary)
                 Spacer()
             }
             .padding(.horizontal, 20)

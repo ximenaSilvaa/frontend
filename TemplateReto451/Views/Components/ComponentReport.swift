@@ -60,7 +60,7 @@ struct ComponentReport: View {
                 
                 Text(user)
                     .font(.headline)
-                    .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                    .foregroundColor(Color.brandPrimary)
                 
                 Spacer()
 
@@ -68,19 +68,19 @@ struct ComponentReport: View {
                     Button(action: toggleLike) {
                         Image(systemName: isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
                             .imageScale(.large)
-                            .foregroundStyle(isLiked ? .blue : .gray)
+                            .foregroundStyle(isLiked ? Color.brandPrimary : Color.brandAccent)
                     }
                     .buttonStyle(PlainButtonStyle())
 
                     Text("\(likeCount)")
                         .font(.caption)
-                        .foregroundColor(isLiked ? .blue : .gray)
+                        .foregroundColor(isLiked ? Color.brandPrimary : Color.brandAccent)
                 }
 
                 Button(action: { showingShareSheet = true }) {
                     Image(systemName: "square.and.arrow.up")
                         .imageScale(.large)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.brandPrimary)
                 }
                 .buttonStyle(PlainButtonStyle())
             }
@@ -88,7 +88,7 @@ struct ComponentReport: View {
             Text(title)
                 .font(.title2)
                 .bold()
-                .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                .foregroundColor(Color.brandPrimary)
             
             Text(abbreviatedDescription(description))
                 .font(.body)
@@ -176,7 +176,7 @@ struct Report: View {
                     
                     Text(user)
                         .font(.headline)
-                        .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                        .foregroundColor(Color.brandPrimary)
                     
                     Spacer()
 
@@ -184,19 +184,19 @@ struct Report: View {
                         Button(action: toggleLike) {
                             Image(systemName: isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
                                 .imageScale(.large)
-                                .foregroundStyle(isLiked ? .blue : .gray)
+                                .foregroundStyle(isLiked ? Color.brandAccent : Color.brandAccent)
                         }
                         .buttonStyle(PlainButtonStyle())
 
                         Text("\(likeCount)")
                             .font(.caption)
-                            .foregroundColor(isLiked ? .blue : .gray)
+                            .foregroundColor(isLiked ? Color.brandAccent : Color.brandAccent)
                     }
 
                     Button(action: { showingShareSheet = true }) {
                         Image(systemName: "square.and.arrow.up")
                             .imageScale(.large)
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(Color.brandAccent)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
@@ -204,10 +204,10 @@ struct Report: View {
                 Text(title)
                     .font(.title2)
                     .bold()
-                    .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                    .foregroundColor(Color.brandPrimary)
                 
                 Text(description)
-                Text("Liga fraudulenta:").bold().foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                Text("Liga fraudulenta:").bold().foregroundColor(Color.brandPrimary)
                 Text(url)
                 report_image
                     .resizable()

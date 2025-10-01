@@ -32,7 +32,7 @@ struct ComponentReportSmall: View {
 
                 Text(user)
                     .font(.headline)
-                    .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                    .foregroundColor(Color.brandPrimary)
 
                 Spacer()
 
@@ -48,7 +48,7 @@ struct ComponentReportSmall: View {
             Text(title)
                 .font(.title2)
                 .bold()
-                .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                .foregroundColor(Color.brandPrimary)
 
             Text(abbreviatedDescription(description))
                 .font(.body)

@@ -31,8 +31,8 @@ extension UserProfileDTO {
         email: "ana@gmail.com",
         profileImage: Image("userprofile"),
         stats: ProfileStats(
-            reports: 3,
-            protectedPeople: 2,
+            reports: 8,
+            protectedPeople: 1,
             inProcess: 1
         )
     )

@@ -21,7 +21,7 @@ struct ScreenAccountSettings: View {
                         }) {
                             Image(systemName: "chevron.left")
                                 .font(.title2)
-                                .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                                .foregroundColor(Color.brandPrimary)
                         }
                         .padding(.leading)
 
@@ -30,7 +30,7 @@ struct ScreenAccountSettings: View {
                         Text("Privacidad")
                             .font(.title)
                             .bold()
-                            .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                            .foregroundColor(Color.brandPrimary)
 
                         Spacer()
 
@@ -70,7 +70,7 @@ struct ScreenAccountSettings: View {
 
                 Toggle("", isOn: isOn)
                     .labelsHidden()
-                    .toggleStyle(SwitchToggleStyle(tint: .blue))
+                    .toggleStyle(SwitchToggleStyle(tint: Color.brandAccent))
             }
 
             Text(description)

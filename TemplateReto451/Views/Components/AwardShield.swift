@@ -58,7 +58,7 @@ struct AwardShield: View {
                         .trim(from: 0, to: progress)
                         .stroke(
                             LinearGradient(
-                                colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.8)],
+                                colors: [Color.brandAccent.opacity(0.8), Color.brandSecondary.opacity(0.8)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
@@ -107,10 +107,10 @@ struct AwardShield: View {
                 if !isUnlocked {
                     Text("\(userReportCount)/\(achievement.reportCount)")
                         .font(.system(.caption2, design: .rounded, weight: .medium))
-                        .foregroundColor(.blue)
+                        .foregroundColor(Color.brandAccent)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 4)
-                        .background(Color.blue.opacity(0.1))
+                        .background(Color.brandAccent.opacity(0.1))
                         .cornerRadius(8)
                 }
             }
@@ -250,25 +250,25 @@ enum AwardLevel {
     var colors: [Color] {
         switch self {
         case .bronze:
-            return [Color(red: 0.8, green: 0.5, blue: 0.2), Color(red: 0.6, green: 0.3, blue: 0.1)]
+            return [Color.brandSecondary.opacity(0.8), Color.brandPrimary]
         case .silver:
-            return [Color(red: 0.9, green: 0.9, blue: 0.9), Color(red: 0.7, green: 0.7, blue: 0.7)]
+            return [Color.brandSecondary, Color.brandPrimary.opacity(0.8)]
         case .gold:
-            return [Color(red: 1.0, green: 0.84, blue: 0.0), Color(red: 0.85, green: 0.65, blue: 0.13)]
+            return [Color.brandAccent, Color.brandAccent.opacity(0.7)]
         case .platinum:
-            return [Color(red: 0.9, green: 0.95, blue: 1.0), Color(red: 0.7, green: 0.8, blue: 0.9)]
+            return [Color.brandPrimary, Color.brandSecondary]
         case .diamond:
-            return [Color(red: 0.7, green: 0.9, blue: 1.0), Color(red: 0.4, green: 0.7, blue: 0.9)]
+            return [Color.brandAccent, Color.brandPrimary]
         }
     }
 
     var shadowColor: Color {
         switch self {
-        case .bronze: return Color(red: 0.4, green: 0.2, blue: 0.1)
-        case .silver: return Color.gray
-        case .gold: return Color(red: 0.6, green: 0.5, blue: 0.0)
-        case .platinum: return Color(red: 0.5, green: 0.6, blue: 0.7)
-        case .diamond: return Color(red: 0.2, green: 0.5, blue: 0.7)
+        case .bronze: return Color.brandPrimary
+        case .silver: return Color.brandSecondary
+        case .gold: return Color.brandAccent
+        case .platinum: return Color.brandPrimary
+        case .diamond: return Color.brandAccent
         }
     }
 }

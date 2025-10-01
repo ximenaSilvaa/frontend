@@ -20,7 +20,7 @@ struct ScreenUserSettings: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.title2)
-                            .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                            .foregroundColor(Color.brandPrimary)
                     }
                     .padding(.leading)
 
@@ -29,7 +29,7 @@ struct ScreenUserSettings: View {
                     Text("Ajustes")
                         .font(.title)
                         .bold()
-                        .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                        .foregroundColor(Color.brandPrimary)
 
                     Spacer()
 
@@ -45,7 +45,7 @@ struct ScreenUserSettings: View {
                 Text("Tu cuenta")
                     .font(.title2)
                     .bold()
-                    .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                    .foregroundColor(Color.brandPrimary)
                     .padding(.horizontal)
                 // change destination
                 sectionNav(icon: "person", text: "Centro de cuentas", destination: ScreenAccountSettings())
@@ -57,14 +57,14 @@ struct ScreenUserSettings: View {
                         Text("Notificaciones")
                             .font(.title2)
                             .bold()
-                            .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                            .foregroundColor(Color.brandPrimary)
                             .padding(.horizontal)
 
                         HStack {
                             Image(systemName: "bell")
-                                .foregroundColor(.blue)
+                                .foregroundColor(Color.brandAccent)
                             Text("Notificaciones")
-                                .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                                .foregroundColor(Color.brandPrimary)
                             Spacer()
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.gray)
@@ -78,7 +78,7 @@ struct ScreenUserSettings: View {
                 Text("Privacidad")
                     .font(.title2)
                     .bold()
-                    .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                    .foregroundColor(Color.brandPrimary)
                     .padding(.horizontal)
                 //change destination
                 sectionNav(icon: "lock", text: "Privacidad de la cuenta",  destination: ScreenPasswordChange())
@@ -86,7 +86,7 @@ struct ScreenUserSettings: View {
                 Text("Acceso")
                     .font(.title2)
                     .bold()
-                    .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                    .foregroundColor(Color.brandPrimary)
                     .padding(.horizontal)
                 
                 Button(action: {
@@ -96,15 +96,16 @@ struct ScreenUserSettings: View {
                         .fontWeight(.semibold)
                         .padding()
                         .foregroundColor(.white)
-                        .background(Color.blue)
+                        .background(Color.brandAccent)
                         .cornerRadius(20)
+                        .shadow(color: Color.brandAccent.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 
                 //Change
                 Spacer()
                 NavigationLink(destination: TermsAndConditionsScreen()) {
                     Text("Términos y condiciones")
-                        .foregroundColor(.blue)
+                        .foregroundColor(Color.brandAccent)
                         .underline()
                         .frame(maxWidth: .infinity) // Ocupa todo el ancho
                         .multilineTextAlignment(.center) // Centra el texto
@@ -126,8 +127,8 @@ extension ScreenUserSettings {
         NavigationLink(destination: destination) {
             HStack {
                 Image(systemName: icon)
-                    .foregroundColor(.blue)
-                Text(text).foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                    .foregroundColor(Color.brandAccent)
+                Text(text).foregroundColor(Color.brandPrimary)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .foregroundColor(.gray)

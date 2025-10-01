@@ -19,13 +19,13 @@ struct ProfileScreen: View {
                     NavigationLink(destination: EditProfileScreen(userProfile: $userProfile)) {
                         Image(systemName: "pencil")
                             .font(.title2)
-                            .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                            .foregroundColor(Color.brandPrimary)
                     }
 
                     NavigationLink(destination: ScreenUserSettings()) {
                         Image(systemName: "gearshape")
                             .font(.title2)
-                            .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                            .foregroundColor(Color.brandPrimary)
                     }
                 }
                 .padding(.horizontal)
@@ -37,12 +37,12 @@ struct ProfileScreen: View {
                         .resizable()
                         .frame(width: 80, height: 80)
                         .clipShape(Circle())
-                        .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                        .foregroundColor(Color.brandPrimary)
 
                     Text(userProfile.username)
                         .font(.title2)
                         .bold()
-                        .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                        .foregroundColor(Color.brandPrimary)
 
                     Text(userProfile.name)
                         .font(.subheadline)
@@ -63,13 +63,13 @@ struct ProfileScreen: View {
                     HStack {
                         Text("Estadísticas 2025")
                             .font(.headline)
-                            .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                            .foregroundColor(Color.brandPrimary)
 
                         Spacer()
 
                         NavigationLink(destination: LogrosScreen()) {
                             Image(systemName: "arrow.right")
-                                .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                                .foregroundColor(Color.brandPrimary)
                         }
                     }
 
@@ -77,7 +77,7 @@ struct ProfileScreen: View {
                         StatisticItem(
                             number: userProfile.stats.reports,
                             label: "Reportes",
-                            color: Color(red: 4/255, green: 9/255, blue: 69/255)
+                            color: Color.brandPrimary
                         )
 
                         Rectangle()
@@ -87,7 +87,7 @@ struct ProfileScreen: View {
                         StatisticItem(
                             number: userProfile.stats.protectedPeople,
                             label: "Personas protegidas",
-                            color: Color(red: 4/255, green: 9/255, blue: 69/255)
+                            color: Color.brandPrimary
                         )
 
                         Rectangle()
@@ -97,7 +97,7 @@ struct ProfileScreen: View {
                         StatisticItem(
                             number: userProfile.stats.inProcess,
                             label: "En proceso",
-                            color: Color(red: 4/255, green: 9/255, blue: 69/255)
+                            color: Color.brandPrimary
                         )
                     }
                 }

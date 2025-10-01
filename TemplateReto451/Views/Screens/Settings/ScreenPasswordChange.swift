@@ -26,7 +26,7 @@ struct ScreenPasswordChange: View {
                         }) {
                             Image(systemName: "chevron.left")
                                 .font(.title2)
-                                .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                                .foregroundColor(Color.brandPrimary)
                         }
                         .padding(.leading)
 
@@ -35,7 +35,7 @@ struct ScreenPasswordChange: View {
                         Text("Cambiar contraseña")
                             .font(.title)
                             .bold()
-                            .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                            .foregroundColor(Color.brandPrimary)
 
                         Spacer()
 
@@ -84,8 +84,9 @@ struct ScreenPasswordChange: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(Color.blue)
+                            .background(Color.brandAccent)
                             .cornerRadius(25)
+                            .shadow(color: Color.brandAccent.opacity(0.3), radius: 8, x: 0, y: 4)
                     }
                     .padding(.horizontal)
                     .padding(.top, 20)
@@ -119,8 +120,13 @@ struct ScreenPasswordChange: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
-        .background(Color.gray.opacity(0.1))
+        .background(Color.white)
         .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.brandSecondary.opacity(0.3), lineWidth: 1.5)
+        )
     }
 }
 
