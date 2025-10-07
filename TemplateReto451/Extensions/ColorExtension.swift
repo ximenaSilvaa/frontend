@@ -12,6 +12,7 @@ extension Color {
     static let brandPrimary = Color(hex: "#1B365D")     // Dark Blue - Primary text, headers, main UI
     static let brandSecondary = Color(hex: "#2E5A87")   // Medium Blue - Secondary elements
     static let brandAccent = Color(hex: "#E74C3C")      // Red - Accent color, buttons, selected states
+    static let brandAccepted = Color(hex: "#1ABC9C") // Green - accepted reports
 
     // Legacy color replacement
     static let appBlue = brandPrimary // Replaces Color(red: 4/255, green: 9/255, blue: 69/255)
