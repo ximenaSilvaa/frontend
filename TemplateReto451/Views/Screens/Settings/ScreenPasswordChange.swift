@@ -46,7 +46,7 @@ struct ScreenPasswordChange: View {
                             .padding(.trailing)
                     }
 
-                    Text("La contraseña debe tener al menos 6 caracteres e incluir una combinación de número, letras y caracteres especiales (0%).")
+                    Text("La contraseña debe tener al menos 10 caracteres e incluir una combinación de número, letras y caracteres especiales (!, @, #, $, %, &,).")
                         .font(.body)
                         .foregroundColor(.gray)
                         .padding(.horizontal)

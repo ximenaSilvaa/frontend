@@ -8,15 +8,33 @@
 import Foundation
 
 struct UserRequest: Codable {
-    let email, name, password: String
+    let email: String
+    let name: String
+    let password: String
+    let role_id: String
 }
 
-//To be defined by the endpoint
-struct UserResponse: Decodable {
-    let id: String, email: String, name: String
+struct UserSettingsResponse: Codable {
+    let id: Int
+    let user_id: Int
+    let is_reactions_enabled: Int
+    let is_review_enabled: Int
+    let is_reports_enabled: Int
+}
 
-    // Ignore extra fields from backend (password_hash, salt)
-    private enum CodingKeys: String, CodingKey {
-        case id, email, name
-    }
+struct UserResponse: Codable {
+    let id: Int
+    let name: String
+    let email: String
+    let username: String
+    let salt: String
+    let created_at: String
+    let updated_at: String
+    let image_path: String
+    let role_id: Int
+}
+
+struct RegisterResponse: Codable {
+    let user: UserResponse
+    let settings: [UserSettingsResponse]
 }

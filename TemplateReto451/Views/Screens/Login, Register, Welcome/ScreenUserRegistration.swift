@@ -14,13 +14,30 @@ struct ScreenUserRegistration: View {
     @State private var userForm = UserForm()
     @State private var acceptTerms = false
     @State private var showTerms = false
+    @State private var isLoading: Bool = false
+    @State private var errorMessage: String? = nil
+    @State private var showSuccessAlert: Bool = false
 
     func register() async {
+        isLoading = true
+        errorMessage = nil
+
         do {
             let response = try await authenticationController.registerUser(name: userForm.name, email: userForm.email, password: userForm.password)
-        }
-        catch {
-            print("Error al realizar el registro")
+            isLoading = false
+            showSuccessAlert = true
+        } catch {
+            isLoading = false
+            print("Error al realizar el registro: \(error.localizedDescription)")
+
+            // Set user-friendly error message
+            if error.localizedDescription.contains("Email already exists") || error.localizedDescription.contains("already exists") {
+                errorMessage = "Este correo ya está registrado"
+            } else if error.localizedDescription.contains("network") {
+                errorMessage = "Error de conexión. Verifica tu internet"
+            } else {
+                errorMessage = "Error al crear la cuenta. Intenta de nuevo"
+            }
         }
     }
 
@@ -139,6 +156,48 @@ struct ScreenUserRegistration: View {
                         }
                         .padding(.horizontal, 32)
 
+                        // Validation Errors
+                        if !errors.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                ForEach(errors, id: \.self) { error in
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundColor(.brandAccent)
+                                            .font(.system(size: 12))
+
+                                        Text(error)
+                                            .font(.system(size: 13, weight: .medium))
+                                            .foregroundColor(.brandAccent)
+                                    }
+                                }
+                            }
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.brandAccent.opacity(0.1))
+                            .cornerRadius(8)
+                            .padding(.horizontal, 32)
+                        }
+
+                        // Backend Error Message
+                        if let error = errorMessage {
+                            HStack(spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.brandAccent)
+                                    .font(.system(size: 14))
+
+                                Text(error)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.brandAccent)
+                                    .multilineTextAlignment(.leading)
+
+                                Spacer()
+                            }
+                            .padding(12)
+                            .background(Color.brandAccent.opacity(0.1))
+                            .cornerRadius(8)
+                            .padding(.horizontal, 32)
+                        }
+
                         // Create Account Button
                         Button(action: {
                             errors = userForm.validate()
@@ -157,16 +216,14 @@ struct ScreenUserRegistration: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 14)
-                                .background(Color.blue)
+                                .background(Color.brandAccent)
                                 .cornerRadius(25)
                         }
+                        .disabled(isLoading)
+                        .opacity(isLoading ? 0.6 : 1.0)
                         .padding(.horizontal, 32)
 
-                        // Error Summary
-                        if !errors.isEmpty {
-                            ComponentErrorSummary(errors: errors)
-                        }
-
+                      
                         // Bottom spacing for keyboard
                         Spacer(minLength: 60)
 
@@ -179,11 +236,23 @@ struct ScreenUserRegistration: View {
                     }
                 }
                 .scrollDismissesKeyboard(.interactively)
+
+                // Loading Overlay
+                if isLoading {
+                    LoadingView()
+                }
             }
         }
         .navigationBarHidden(true)
         .sheet(isPresented: $showTerms) {
             TermsAndConditionsScreen()
+        }
+        .alert("Cuenta Creada", isPresented: $showSuccessAlert) {
+            Button("Iniciar Sesión") {
+                dismiss()
+            }
+        } message: {
+            Text("Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesión.")
         }
     }
 }

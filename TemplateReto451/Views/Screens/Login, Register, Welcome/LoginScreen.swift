@@ -11,20 +11,33 @@ struct LoginScreen: View {
     @Environment(\.authenticationController) var authenticationController
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var isLoading: Bool = false
+    @State private var errorMessage: String? = nil
     @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
 
     private func login() async {
-        // Temporary bypass for testing - allows any login
-        isLoggedIn = true
+        // Clear previous error
+        errorMessage = nil
+        isLoading = true
 
-        // Original login code (commented out for testing)
-        /*
         do {
             isLoggedIn = try await authenticationController.loginUser(email: email, password: password)
+            isLoading = false
         } catch {
+            isLoading = false
             print("Error en login \(error.localizedDescription)")
+
+            // Set user-friendly error message
+            if error.localizedDescription.contains("User not found") {
+                errorMessage = "No se encontró una cuenta con este correo"
+            } else if error.localizedDescription.contains("Invalid password") {
+                errorMessage = "Contraseña incorrecta"
+            } else if error.localizedDescription.contains("network") {
+                errorMessage = "Error de conexión. Verifica tu internet"
+            } else {
+                errorMessage = "Error al iniciar sesión. Intenta de nuevo"
+            }
         }
-        */
     }
 
     var body: some View {
@@ -72,6 +85,26 @@ struct LoginScreen: View {
                         }
                         .padding(.horizontal, 32)
 
+                        // Error Message
+                        if let error = errorMessage {
+                            HStack(spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.brandAccent)
+                                    .font(.system(size: 14))
+
+                                Text(error)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.brandAccent)
+                                    .multilineTextAlignment(.leading)
+
+                                Spacer()
+                            }
+                            .padding(12)
+                            .background(Color.brandAccent.opacity(0.1))
+                            .cornerRadius(8)
+                            .padding(.horizontal, 32)
+                        }
+
                         // Login Button
                         Button(action: {
                             Task {
@@ -83,9 +116,11 @@ struct LoginScreen: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 14)
-                                .background(Color.blue)
+                                .background(Color.brandAccent)
                                 .cornerRadius(25)
                         }
+                        .disabled(isLoading)
+                        .opacity(isLoading ? 0.6 : 1.0)
                         .padding(.horizontal, 32)
 
                         // Create Account Link
@@ -108,6 +143,11 @@ struct LoginScreen: View {
                     }
                 }
                 .scrollDismissesKeyboard(.interactively)
+
+                // Loading Overlay
+                if isLoading {
+                    LoadingView()
+                }
             }
         }
         .navigationBarHidden(true)

@@ -10,10 +10,9 @@ import Foundation
 struct AuthenticationController{
     let httpClient: HTTPClient
     
-    func registerUser(name: String, email: String, password: String) async throws -> Bool{
+    func registerUser(name: String, email: String, password: String) async throws -> RegisterResponse {
         let registrationResponse = try await httpClient.registerUser(name: name, email: email, password: password)
         return registrationResponse
-        
     }
     func loginUser(email: String, password: String) async throws -> Bool{
         let loginResponse = try await httpClient.loginUser(email: email, password: password)

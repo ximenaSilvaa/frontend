@@ -19,13 +19,13 @@ struct ProfileScreen: View {
                     NavigationLink(destination: EditProfileScreen(userProfile: $userProfile)) {
                         Image(systemName: "pencil")
                             .font(.title2)
-                            .foregroundColor(Color.brandPrimary)
+                            .foregroundColor(Color.brandAccent)
                     }
 
                     NavigationLink(destination: ScreenUserSettings()) {
                         Image(systemName: "gearshape")
                             .font(.title2)
-                            .foregroundColor(Color.brandPrimary)
+                            .foregroundColor(Color.brandAccent)
                     }
                 }
                 .padding(.horizontal)
@@ -77,7 +77,7 @@ struct ProfileScreen: View {
                         StatisticItem(
                             number: userProfile.stats.reports,
                             label: "Reportes",
-                            color: Color.brandPrimary
+                            color: Color.brandAccent
                         )
 
                         Rectangle()
@@ -87,7 +87,7 @@ struct ProfileScreen: View {
                         StatisticItem(
                             number: userProfile.stats.protectedPeople,
                             label: "Personas protegidas",
-                            color: Color.brandPrimary
+                            color: Color.brandAccent
                         )
 
                         Rectangle()
@@ -97,7 +97,7 @@ struct ProfileScreen: View {
                         StatisticItem(
                             number: userProfile.stats.inProcess,
                             label: "En proceso",
-                            color: Color.brandPrimary
+                            color: Color.brandAccent
                         )
                     }
                 }
@@ -110,11 +110,10 @@ struct ProfileScreen: View {
                     .padding(.horizontal)
 
                 // Sample Report
-                ComponentReportSmall(
-                    user: userProfile.username,
-                    user_image: userProfile.profileImage,
-                    title: "Estafa venta Coches.com",
-                    description: "El sitio detectado simula ser una página de compraventa de automóviles seminuevos, utilizando fotografías tomadas de portales legítimos para aparentar confiabilidad. La modalidad del fraude consiste en que los supuestos vendedores solicitan de manera insistente el pago anticipado del 50% del valor del automóvil, alegando que dicho anticipo es indispensable para \"asegurar la reserva\" o \"cubrir los gastos de envío a domicilio\".",                )
+                ComponentReport(
+                    report: ReportDTO.sample,
+                    size: .small
+                )
                 .padding(.horizontal)
 
                 Spacer()
@@ -135,13 +134,15 @@ struct StatisticItem: View {
                 .font(.largeTitle)
                 .bold()
                 .foregroundColor(color)
+                .frame(maxWidth: .infinity, alignment: .center)
 
             Text(label)
                 .font(.caption)
                 .foregroundColor(color)
                 .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }
 

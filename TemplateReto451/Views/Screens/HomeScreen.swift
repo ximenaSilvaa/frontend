@@ -8,29 +8,14 @@ import SwiftUI
 
 struct HomeScreen: View {
     @State private var searchText: String = ""
-    @State private var selectedCategory: String? = nil
-    
-    //bd
-    let categories = ["Electródomesticos", "Muebles", "Ropa", "Electrónica", "Libros", "Juguetes", "Deportes"]
-    
-    let reports = [
-        (
-            user: "AnaTellez",
-            user_image: Image("userprofile"),
-            title: "Estafa Venta de Coches",
-            description: "El sitio detectado simula ser una página de compraventa de automóviles seminuevos, utilizando fotografías tomadas de portales legítimos para aparentar confiabilidad. La modalidad del fraude consiste en que los supuestos vendedores solicitan de manera insistente el pago anticipado del 50% del valor del automóvil, alegando que dicho anticipo es indispensable para \"asegurar la reserva\" o \"cubrir los gastos de envío a domicilio\".",
-            report_image: Image("reporsample"),
-            category: "Electrodomésticos"
-        ),
-        (
-            user: "JuanPérez",
-            user_image: Image("userprofile2"),
-            title: "Alerta de Fraude",
-            description: "Página fraudulenta que busca engañar a los usuarios haciéndose pasar por un sitio legítimo. Solicita datos personales, información bancaria y hasta pagos por adelantado con la promesa de servicios o productos que nunca se entregan. El sitio utiliza mensajes de urgencia y promociones falsas para presionar a las personas y lograr que compartan su información sensible. Se recomienda no proporcionar ningún dato ni realizar transferencias, ya que todo es parte de un esquema de estafa.",
-            report_image: Image("reporsample2"),
-            category: "Muebles"
-        )
-    ]
+    @State private var selectedCategory: Int? = nil
+    @State private var reports: [ReportDTO] = []
+    @State private var allReports: [ReportDTO] = []
+    @State private var categories: [CategoryDTO] = []
+    @State private var isLoading: Bool = false
+    @State private var errorMessage: String? = nil
+
+    private let httpClient = HTTPClient()
     
     var body: some View {
         VStack {
@@ -63,12 +48,13 @@ struct HomeScreen: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            ForEach(categories, id: \.self) { category in
+                            ForEach(categories) { category in
                                 FilterTab(
-                                    title: category,
-                                    isSelected: selectedCategory == category,
+                                    title: category.name,
+                                    isSelected: selectedCategory == category.id,
                                     action: {
-                                        selectedCategory = selectedCategory == category ? nil : category
+                                        selectedCategory = selectedCategory == category.id ? nil : category.id
+                                        filterReports()
                                     }
                                 )
                             }
@@ -77,23 +63,121 @@ struct HomeScreen: View {
                     }
                     .frame(height: 60)
                     
-                    
-                    VStack(spacing: 20) {
-                        ForEach(reports, id: \.title) { report in
-                            ComponentReport(
-                                user: report.user,
-                                user_image: report.user_image,
-                                title: report.title,
-                                description: report.description,
-                                report_image: report.report_image
-                            )
+
+                    if isLoading {
+                        ProgressView("Cargando reportes...")
+                            .padding()
+                    } else if let error = errorMessage {
+                        VStack(spacing: 12) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 48))
+                                .foregroundColor(.orange)
+                            Text("Error al cargar reportes")
+                                .font(.headline)
+                            Text(error)
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                                .multilineTextAlignment(.center)
+                            Button("Reintentar") {
+                                Task {
+                                    await loadData()
+                                }
+                            }
+                            .padding()
+                            .background(Color.brandAccent)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
                         }
+                        .padding()
+                    } else {
+                        VStack(spacing: 20) {
+                            ForEach(reports) { report in
+                                ComponentReport(
+                                    report: report,
+                                    size: .normal
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
                 }
                 .padding(.vertical)
             }
         }
+        .onAppear {
+            Task {
+                await loadData()
+            }
+        }
+        .onChange(of: searchText) { _ in
+            filterReports()
+        }
     }
-    
+
+    private func loadData() async {
+        isLoading = true
+        errorMessage = nil
+
+        do {
+            async let reportsTask = httpClient.getReports(status: "2")
+            async let categoriesTask = httpClient.getCategories()
+
+            let (fetchedReports, fetchedCategories) = try await (reportsTask, categoriesTask)
+
+            allReports = fetchedReports
+            categories = fetchedCategories
+            reports = fetchedReports
+            isLoading = false
+        } catch {
+            errorMessage = error.localizedDescription
+            isLoading = false
+            print("Error loading data: \(error)")
+        }
+    }
+
+    private func filterReports() {
+        var filtered = allReports
+
+        // Filter by category
+        if let categoryId = selectedCategory {
+            filtered = filtered.filter { report in
+                report.categories.contains(categoryId)
+            }
+        }
+
+        // Filter by search text
+        if !searchText.isEmpty {
+            let searchLower = searchText.lowercased()
+            filtered = filtered.filter { report in
+                // Search in user_name
+                if report.user_name.lowercased().contains(searchLower) {
+                    return true
+                }
+                // Search in title
+                if report.title.lowercased().contains(searchLower) {
+                    return true
+                }
+                // Search in description
+                if report.description.lowercased().contains(searchLower) {
+                    return true
+                }
+                // Search in report_url
+                if report.report_url.lowercased().contains(searchLower) {
+                    return true
+                }
+                // Search in category names
+                let categoryNames = categories
+                    .filter { report.categories.contains($0.id) }
+                    .map { $0.name.lowercased() }
+
+                if categoryNames.contains(where: { $0.contains(searchLower) }) {
+                    return true
+                }
+
+                return false
+            }
+        }
+
+        reports = filtered
+    }
 }

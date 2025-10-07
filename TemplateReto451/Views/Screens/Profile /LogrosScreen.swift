@@ -49,7 +49,7 @@ struct LogrosScreen: View {
                     ))
             }
 
-            // Back Arrow (Always Visible)
+            // El chevron.left siempre presente
             VStack {
                 HStack {
                     Button(action: {
@@ -93,8 +93,12 @@ struct LogrosScreen: View {
                         .font(.largeTitle)
                         .bold()
                         .foregroundColor(Color.brandPrimary)
-                    Spacer()
+                    Text("2025")
+                        .font(.largeTitle)
+                        .bold()
+                        .foregroundColor(Color.brandAccent)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 20)
                 .padding(.top, 50)
 
@@ -162,11 +166,13 @@ struct LogrosScreen: View {
                         .font(.title)
                         .bold()
                         .foregroundColor(Color.brandPrimary)
-
-                    Spacer()
-
+                    Text("2025")
+                        .font(.title)
+                        .bold()
+                        .foregroundColor(Color.brandAccent)
                
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 20)
                 .padding(.top, 15)
 
@@ -198,8 +204,9 @@ struct LogrosScreen: View {
                         Text("2025")
                             .font(.largeTitle)
                             .bold()
-                            .foregroundColor(Color.brandPrimary)
+                            .foregroundColor(Color.brandAccent)
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
                     .padding(.top, 60)
 
@@ -211,7 +218,7 @@ struct LogrosScreen: View {
                         }) {
                             Text(period.rawValue)
                                 .font(.headline)
-                                .foregroundColor(selectedPeriod == period ? Color.brandPrimary : .gray)
+                                .foregroundColor(selectedPeriod == period ? Color.brandAccent : .brandPrimary)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
                                 .background(

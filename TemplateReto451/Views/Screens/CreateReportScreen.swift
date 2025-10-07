@@ -14,9 +14,11 @@ struct CreateReportScreen: View {
     @State private var reportURL: String = ""
 
     @State private var reportImage: Data? = nil
-    @State private var selectedCategory: String? = nil
+    @State private var selectedCategory: Int? = nil
+    @State private var categories: [CategoryDTO] = []
+    @State private var isLoadingCategories: Bool = false
 
-    let categories = ["Electródomesticos", "Muebles", "Ropa", "Electrónica", "Libros", "Juguetes", "Deportes"]
+    private let httpClient = HTTPClient()
     
     var body: some View {
         ScrollView {
@@ -88,19 +90,25 @@ struct CreateReportScreen: View {
                         .font(.title2)
                         .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
                     Divider()
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            ForEach(categories, id: \.self) { category in
-                                FilterTab(
-                                    title: category,
-                                    isSelected: selectedCategory == category,
-                                    action: {
-                                        selectedCategory = selectedCategory == category ? nil : category
-                                    }
-                                )
+
+                    if isLoadingCategories {
+                        ProgressView("Cargando categorías...")
+                            .padding()
+                    } else {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(categories) { category in
+                                    FilterTab(
+                                        title: category.name,
+                                        isSelected: selectedCategory == category.id,
+                                        action: {
+                                            selectedCategory = selectedCategory == category.id ? nil : category.id
+                                        }
+                                    )
+                                }
                             }
+                            .padding(.vertical, 4)
                         }
-                        .padding(.vertical, 4)
                     }
                 }
 
@@ -137,7 +145,7 @@ struct CreateReportScreen: View {
                         .padding(.horizontal, 32)
                         .padding(.vertical, 12)
                         .foregroundColor(.white)
-                        .background(Color.blue)
+                        .background(Color.brandAccent.opacity(0.95))
                         .cornerRadius(20)
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -145,6 +153,22 @@ struct CreateReportScreen: View {
             }
             .padding(.horizontal)
             .padding(.bottom)
+        }
+        .onAppear {
+            Task {
+                await loadCategories()
+            }
+        }
+    }
+
+    private func loadCategories() async {
+        isLoadingCategories = true
+        do {
+            categories = try await httpClient.getCategories()
+            isLoadingCategories = false
+        } catch {
+            print("Error loading categories: \(error)")
+            isLoadingCategories = false
         }
     }
 }
