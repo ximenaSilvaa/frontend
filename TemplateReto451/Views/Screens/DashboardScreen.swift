@@ -61,12 +61,14 @@ struct DashboardScreen: View {
         ("Alerta: aumento en fraudes financieros en invierte.mx",11),
     ]
         
-    func grayLevel(index: Int, total: Int) -> Double {
-            let minGray: Double = 0.3
-            let maxGray: Double = 0.9
-            let step = (maxGray - minGray) / Double(max(1, total - 1))
-            return maxGray - (Double(index) * step)
-        }
+    func colorLevel(index: Int, total: Int) -> Double {
+        let minVal = 0.7
+        let maxVal = 1.0
+        let normalized = Double(index) / Double(max(1, total - 1))
+        // Curva con un poco de easing para que los cambios se sientan naturales
+        return minVal + (maxVal - minVal) * (1 - pow(normalized, 0.5))
+    }
+
     
         var body: some View {
             
@@ -78,11 +80,11 @@ struct DashboardScreen: View {
                         Text("Estadísticas")
                                .font(.largeTitle)
                                .bold()
-                               .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                               .foregroundColor(Color.brandPrimary)
                                .frame(maxWidth: .infinity, alignment: .center)
                                .padding(.top)
                         
-                        //
+                        Spacer()
                         LazyVGrid(columns: [
                             GridItem(.flexible()),
                             GridItem(.flexible())
@@ -91,15 +93,14 @@ struct DashboardScreen: View {
                             ProgressStatCard(title: "Personas Protegidas", value: String(protectedPeople), hasBackground: true)
                         }
                         .padding(.horizontal)
-                        .padding(.bottom, 1)
+                        .padding(.bottom, 10)
                         
-                        //
+    
                         VStack(alignment: .leading, spacing: 16) {
-                            // Título de sección
                             Text("Top reportes del mes")
                                 .font(.title2)
                                 .bold()
-                                .foregroundColor(.black)
+                                .foregroundColor(.brandAccent)
                                 .padding(.bottom, 8)
 
                     
@@ -107,9 +108,9 @@ struct DashboardScreen: View {
                             let maxCountWithMargin = Int(Double(maxValue) * 1.1)
 
      
-                            ForEach(topReportsMonth, id: \.0) { category, count in
+                            ForEach(topReportsMonth, id: \.0) { titleReport, count in
                                 BarView(
-                                    category: category,
+                                    titleReport: titleReport,
                                     count: count,
                                     maxCount: maxCountWithMargin,
                                     text: "\(count) likes"
@@ -120,7 +121,9 @@ struct DashboardScreen: View {
 
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Logros Comunitarios")
-                                .font(.headline)
+                                .font(.title2)
+                                .bold().foregroundColor(.brandAccent)
+                                
                             AchievementRow(icon: "star.fill", title: "Reporteros Activos", subtitle: "\(approvedReports) reportes procesados")
                             AchievementRow(icon: "shield.lefthalf.fill", title: "Protección", subtitle: "\(protectedPeople) personas protegidas")
                             AchievementRow(icon: "flame.fill", title: "Comunidad en Crecimiento", subtitle: "\(users) usuarios activos")
@@ -128,19 +131,19 @@ struct DashboardScreen: View {
                         .padding()
                         .background(Color.gray.opacity(0.06))
                         .cornerRadius(12)
-                        
-                    ////
-                        ///
+                    
+                        Spacer()
                         Text("Estado de reportes")
-                            .font(.headline)
+                            .font(.title2)
+                            .bold().foregroundColor(.brandAccent)
 
                         HStack {
                 
                             Chart {
                                 let estadoReports = [
-                                    ("Aprobados", approvedReports, Color.green),
-                                    ("Rechazados", rejectedReports, Color.red),
-                                    ("Pendientes", pendingReports, Color.yellow)
+                                    ("Aprobados", approvedReports, Color.brandAccepted),
+                                    ("Rechazados", rejectedReports, Color.brandAccent),
+                                    ("Pendientes", pendingReports, Color.brandSecondary)
                                 ]
 
                                 ForEach(estadoReports, id: \.0) { item in
@@ -159,7 +162,7 @@ struct DashboardScreen: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack {
                                     Circle()
-                                        .fill(Color.green)
+                                        .fill(Color.brandAccepted)
                                         .frame(width: 12, height: 12)
                                     Text("Aprobados")
                                         .font(.caption)
@@ -167,7 +170,7 @@ struct DashboardScreen: View {
 
                                 HStack {
                                     Circle()
-                                        .fill(Color.red)
+                                        .fill(Color.brandAccent)
                                         .frame(width: 12, height: 12)
                                     Text("Rechazados")
                                         .font(.caption)
@@ -175,7 +178,7 @@ struct DashboardScreen: View {
 
                                 HStack {
                                     Circle()
-                                        .fill(Color.yellow)
+                                        .fill(Color.brandSecondary)
                                         .frame(width: 12, height: 12)
                                     Text("Pendientes")
                                         .font(.caption)
@@ -185,16 +188,16 @@ struct DashboardScreen: View {
                         }
 
 
-                        ///
-                       
+                        Spacer()
                         Text("Reportes por categoría")
+                            .font(.title2)
+                            .bold().foregroundColor(.brandAccent)
                         HStack {
-                            // Leyenda a la izquierda
                             VStack(alignment: .leading, spacing: 8) {
                                 ForEach(Array(topCategoriesReports.enumerated()), id: \.1.0) { index, item in
                                     HStack {
                                         Circle()
-                                            .fill(Color(white: grayLevel(index: index, total: topCategoriesReports.count)))
+                                            .fill(Color.brandSecondary.opacity(colorLevel(index: index, total: topCategoriesReports.count)))
                                             .frame(width: 12, height: 12)
                                         Text(item.0)
                                             .font(.caption)
@@ -211,26 +214,48 @@ struct DashboardScreen: View {
                                         innerRadius: .ratio(0.5),
                                         angularInset: 1.5
                                     )
-                                    .foregroundStyle(Color(white: grayLevel(index: index, total: topCategoriesReports.count)))
+                                    .foregroundStyle(Color.brandSecondary.opacity(colorLevel(index: index, total: topCategoriesReports.count)))
                                 }
                             }
                             .frame(width: 200, height: 200)
                         }
 
-                        ///
-                        
-                        ///
+                        Spacer()
                         VStack(alignment: .leading) {
                             Text("Alertas recientes")
-                                .font(.headline)
+                                .font(.title2)
+                                .bold().foregroundColor(.brandAccent)
                             
                             ForEach(Array(recentAlerts.enumerated()), id: \.element) { index, alert in
                                 VStack(alignment: .leading) {
-                                    Text("\(alert)")
-                                        .padding(.vertical, 2)
                                     
+                                    NavigationLink(destination: Report(
+                                        user: "User",
+                                        user_image: Image("userprofile"),
+                                        title: "titulo",
+                                        description: "description",
+                                        report_image: Image("reporsample"),
+                                        url: "https://tevoyaestafar.com/coches"
+                                    )) {
+                                        HStack(alignment: .top, spacing: 8) {
+                                            Text(alert)
+                                                .foregroundColor(.brandPrimary)
+                                                .font(.subheadline)
+                                                .fixedSize(horizontal: false, vertical: true)
+                                                .multilineTextAlignment(.leading)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .foregroundColor(.gray)
+                                                .padding(.top, 2)
+                                        }
+                                        .contentShape(Rectangle())
+                                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                                        .padding(.vertical, 8)
+                                    }
+
                                     if index < recentAlerts.count - 1 {
                                         Divider()
+                                            .background(Color.brandAccent)
                                     }
                                 }
                             }
@@ -238,12 +263,12 @@ struct DashboardScreen: View {
                         .padding()
                         .background(Color.gray.opacity(0.06))
                         .cornerRadius(12)
-                        
+                        Spacer()
                         
 
-                    ////
                     Text("Reportes por Mes")
-                        .font(.headline)
+                            .font(.title2)
+                            .bold().foregroundColor(.brandAccent)
                                     
                     Chart {
                         ForEach(reportsPerMonth, id: \.0) { month, value in
@@ -259,30 +284,51 @@ struct DashboardScreen: View {
                                     .frame(height: 300)
                                     .padding()
                         
-                        
-                        // Ranking usuarios más activos
+                        Spacer()
                         VStack(alignment: .leading) {
                             Text("Usuarios más activos")
-                                .font(.headline)
-                            ForEach(topUsers, id: \.0) { user, reports in
-                                HStack {
-                                    Text(user)
-                                    Spacer()
-                                    Text("\(reports) reportes")
-                                        .foregroundColor(.secondary)
+                                .font(.title2)
+                                .bold()
+                                .foregroundColor(.brandAccent)
+
+                            ForEach(Array(topUsers.enumerated()), id: \.element.0) { index, element in
+                                let (user, reports) = element
+
+                                VStack(alignment: .leading, spacing: 0) {
+                                    HStack {
+                                        Text(user)
+                                            .foregroundColor(.brandPrimary)
+                                        Spacer()
+                                        Text("\(reports) reportes")
+                                            .foregroundColor(.brandSecondary)
+                                    }
+                                    .padding(.vertical, 4)
+
+                                    if index < topUsers.count - 1 {
+                                        Divider()
+                                            .background(Color.brandAccent)
+                                    }
                                 }
-                                .padding(.vertical, 4)
                             }
                         }
                         .padding()
                         .background(Color.gray.opacity(0.06))
                         .cornerRadius(12)
+
                         
+                        Spacer()
                         
-                        
-                        
-                    
-            
+                        VStack(spacing: 20) {
+                            // Official Logo Image
+                            Image("app-logo")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 70, height: 70)
+                        }
+
+                        Link("Ir a Red por la Ciberseguridad", destination: URL(string: "https://redporlaciberseguridad.org/")!)
+                                    .foregroundColor(.brandSecondary)
+                                    .underline()
                         
                     }.navigationTitle("Dashboard")
                     .navigationBarTitleDisplayMode(.inline)
@@ -295,27 +341,42 @@ struct DashboardScreen: View {
 
 ///
 
+
 struct BarView: View {
-    let category: String
+    let titleReport: String
     let count: Int
     let maxCount: Int
     let text: String
 
     var body: some View {
+        
         VStack(alignment: .leading, spacing: 6) {
-            Text(category)
-                .font(.subheadline)
-                .foregroundColor(Color.gray.opacity(0.6))
-                .fixedSize(horizontal: false, vertical: true)
+            // Obtenido con el id
+            NavigationLink(destination: Report(
+                user: "User",
+                user_image: Image("userprofile"),
+                title: "titulo",
+                description: "description",
+                report_image: Image("reporsample"),
+                url: "https://tevoyaestafar.com/coches"
+            )) {
+                HStack {
+                    Text(titleReport)
+                        .font(.subheadline)
+                        .foregroundColor(.brandPrimary.opacity(0.8))
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.gray)
+                }
                 .frame(maxWidth: .infinity, alignment: .leading)
-
+            }
 
             HStack {
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
-                    
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.gray.opacity(0.6))
+                            .fill(Color.brandSecondary)
                             .frame(
                                 width: CGFloat(count) / CGFloat(max(maxCount, 1)) * geo.size.width,
                                 height: 14
@@ -324,9 +385,9 @@ struct BarView: View {
                 }
                 .frame(height: 14)
 
-                Text("\(text)")
+                Text(text)
                     .font(.caption)
-                    .foregroundColor(Color.gray.opacity(0.6))
+                    .foregroundColor(.brandPrimary.opacity(0.6))
                     .frame(width: 60, alignment: .trailing)
             }
             .frame(height: 14)
@@ -344,7 +405,7 @@ struct AchievementRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(Color.gray)
+                .foregroundColor(Color.brandPrimary)
                 .font(.system(size: 28))
                 .frame(width: 36, height: 36)
              
@@ -352,10 +413,10 @@ struct AchievementRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(Color.gray)
+                    .foregroundColor(Color.brandPrimary)
                 Text(subtitle)
                     .font(.subheadline)
-                    .foregroundColor(Color.gray)
+                    .foregroundColor(Color.brandSecondary)
             }
             Spacer()
         }
