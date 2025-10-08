@@ -15,6 +15,6 @@ extension String {
         return range(of: emailRegex, options: .regularExpression, range: nil, locale: nil) != nil
     }
     var isValidPassword: Bool {
-        return count >= 4
+        return count >= 8
     }
 }

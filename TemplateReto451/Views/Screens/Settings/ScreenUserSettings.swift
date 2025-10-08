@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ScreenUserSettings: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    @State private var isLoggingOut: Bool = false
 
     var body: some View {
         ScrollView {
@@ -90,16 +92,25 @@ struct ScreenUserSettings: View {
                     .padding(.horizontal)
                 
                 Button(action: {
-                    // Eliminar tokens
+                    logout()
                 }) {
-                    Text("Cerrar sesión")
-                        .fontWeight(.semibold)
-                        .padding()
-                        .foregroundColor(.white)
-                        .background(Color.brandAccent)
-                        .cornerRadius(20)
-                        .shadow(color: Color.brandAccent.opacity(0.3), radius: 8, x: 0, y: 4)
+                    HStack {
+                        if isLoggingOut {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .scaleEffect(0.8)
+                        }
+                        Text("Cerrar sesión")
+                            .fontWeight(.semibold)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .foregroundColor(.white)
+                    .background(isLoggingOut ? Color.brandAccent.opacity(0.6) : Color.brandAccent)
+                    .cornerRadius(20)
+                    .shadow(color: Color.brandAccent.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
+                .disabled(isLoggingOut)
                 
                 //Change
                 Spacer()
@@ -117,6 +128,20 @@ struct ScreenUserSettings: View {
         .padding()
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarHidden(true)
+        }
+    }
+
+    private func logout() {
+        isLoggingOut = true
+
+        // Clear tokens
+        TokenStorage.shared.remove(identifier: "accessToken")
+        TokenStorage.shared.remove(identifier: "refreshToken")
+
+        // Small delay to show loading indicator
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            isLoggedIn = false
+            isLoggingOut = false
         }
     }
 }

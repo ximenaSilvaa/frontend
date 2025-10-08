@@ -28,15 +28,18 @@ struct ScreenUserRegistration: View {
             showSuccessAlert = true
         } catch {
             isLoading = false
-            print("Error al realizar el registro: \(error.localizedDescription)")
+            print("❌ Error al realizar el registro: \(error)")
+            print("❌ Error description: \(error.localizedDescription)")
 
             // Set user-friendly error message
-            if error.localizedDescription.contains("Email already exists") || error.localizedDescription.contains("already exists") {
+            if error.localizedDescription.contains("Email already exists") || error.localizedDescription.contains("already exists") || error.localizedDescription.contains("Conflict") {
                 errorMessage = "Este correo ya está registrado"
-            } else if error.localizedDescription.contains("network") {
+            } else if error.localizedDescription.contains("network") || error.localizedDescription.contains("Network") {
                 errorMessage = "Error de conexión. Verifica tu internet"
+            } else if error.localizedDescription.contains("404") || error.localizedDescription.contains("Not Found") {
+                errorMessage = "Error del servidor. El endpoint no existe."
             } else {
-                errorMessage = "Error al crear la cuenta. Intenta de nuevo"
+                errorMessage = "Error al crear la cuenta. Intenta de nuevo: \(error.localizedDescription)"
             }
         }
     }
@@ -282,7 +285,7 @@ extension ScreenUserRegistration {
                     errors.append("Correo no es válido")
                 }
             if !password.isValidPassword{
-                    errors.append("Contraseña no es válida")
+                    errors.append("La contraseña debe tener al menos 8 caracteres")
                 }
             if password != confirmPassword {
                     errors.append("Las contraseñas no coinciden")

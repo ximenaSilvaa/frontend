@@ -8,39 +8,63 @@
 import SwiftUI
 
 struct WelcomeScreen: View {
-    @State private var navigateToLogin = false
+    @Environment(\.authenticationController) var authenticationController
+    @State private var isActive = false
+    @State private var isValidatingToken = false
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.white
-                    .ignoresSafeArea()
+        ZStack {
+            Color.white
+                .ignoresSafeArea()
 
+            VStack(spacing: 20) {
+                Spacer()
+
+                // Logo Section
                 VStack(spacing: 20) {
-                    Spacer()
+                    // Official Logo Image
+                    Image("app-logo")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 300, height: 300)
+                }
 
-                    // Logo Section
-                    VStack(spacing: 20) {
-                        // Official Logo Image
-                        Image("app-logo")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 300, height: 300)
+                Spacer()
+            }
+        }
+        .onAppear {
+            Task {
+                // If user is supposed to be logged in, validate the token first
+                if isLoggedIn {
+                    isValidatingToken = true
+                    do {
+                        let isValid = try await authenticationController.validateToken()
+                        if !isValid {
+                            // Token is invalid, reset login state
+                            isLoggedIn = false
+                        }
+                    } catch {
+                        // Token validation failed, reset login state
+                        isLoggedIn = false
                     }
+                    isValidatingToken = false
+                }
 
-                    Spacer()
+                // Wait 3 seconds (or remaining time if validation took time)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    isActive = true
                 }
             }
         }
-        .navigationBarHidden(true)
-        .onAppear {
-            // Auto-navigate to login after 3 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                navigateToLogin = true
+        .fullScreenCover(isPresented: $isActive) {
+            if isLoggedIn {
+                ComponentNavbar()
+            } else {
+                NavigationStack {
+                    LoginScreen()
+                }
             }
-        }
-        .navigationDestination(isPresented: $navigateToLogin) {
-            LoginScreen()
         }
     }
 }

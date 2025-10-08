@@ -10,7 +10,8 @@ import Foundation
 struct URLEndpoints {
     static let server: String = "http://18.221.59.69"
     static let login: String = String(server+"/auth/login")
-    static let register: String = String(server+"/users")
+    static let register: String = String(server+"/users/register")
+    static let users: String = String(server+"/users")
     static let reports: String = String(server+"/reports")
     static let categories: String = String(server+"/categories")
     static let upvotes: String = String(server+"/upvotes")

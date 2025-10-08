@@ -8,7 +8,12 @@
 import SwiftUI
 
 struct ProfileScreen: View {
+    private let httpClient = HTTPClient()
+
     @State private var userProfile = UserProfileDTO.sample
+    @State private var userData: UserResponse?
+    @State private var isLoading = false
+    @State private var errorMessage: String?
 
     var body: some View {
         ScrollView {
@@ -33,26 +38,48 @@ struct ProfileScreen: View {
 
                 // Profile Info Section
                 VStack(spacing: 8) {
-                    userProfile.profileImage
-                        .resizable()
-                        .frame(width: 80, height: 80)
-                        .clipShape(Circle())
-                        .foregroundColor(Color.brandPrimary)
+                    // Profile Image with placeholder
+                    if let userData = userData, !userData.image_path.isEmpty {
+                        AsyncImage(url: URL(string: URLEndpoints.server + "/" + userData.image_path)) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                                    .frame(width: 80, height: 80)
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 80, height: 80)
+                                    .clipShape(Circle())
+                            case .failure:
+                                Image(systemName: "person.circle.fill")
+                                    .resizable()
+                                    .frame(width: 80, height: 80)
+                                    .foregroundColor(Color.brandPrimary)
+                            @unknown default:
+                                Image(systemName: "person.circle.fill")
+                                    .resizable()
+                                    .frame(width: 80, height: 80)
+                                    .foregroundColor(Color.brandPrimary)
+                            }
+                        }
+                    } else {
+                        Image(systemName: "person.circle.fill")
+                            .resizable()
+                            .frame(width: 80, height: 80)
+                            .foregroundColor(Color.brandPrimary)
+                    }
 
-                    Text(userProfile.username)
+                    Text(userData?.username ?? userProfile.username)
                         .font(.title2)
                         .bold()
                         .foregroundColor(Color.brandPrimary)
 
-                    Text(userProfile.name)
+                    Text(userData?.name ?? userProfile.name)
                         .font(.subheadline)
                         .foregroundColor(.gray)
 
-                    Text(userProfile.location)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-
-                    Text(userProfile.email)
+                    Text(userData?.email ?? userProfile.email)
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
@@ -120,6 +147,30 @@ struct ProfileScreen: View {
             }
         }
         .navigationBarHidden(true)
+        .refreshable {
+            await fetchUserProfile()
+        }
+        .onAppear {
+            if userData == nil {
+                Task {
+                    await fetchUserProfile()
+                }
+            }
+        }
+    }
+
+    private func fetchUserProfile() async {
+        isLoading = true
+        errorMessage = nil
+
+        do {
+            userData = try await httpClient.getUserProfile()
+            isLoading = false
+        } catch {
+            errorMessage = "Error loading profile"
+            isLoading = false
+            print("Error fetching user profile: \(error.localizedDescription)")
+        }
     }
 }
 

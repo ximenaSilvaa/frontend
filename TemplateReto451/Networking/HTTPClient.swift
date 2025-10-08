@@ -1,240 +1,424 @@
 //
 //  HTTPClient.swift
-//  TemplateReto451
-//
-//  Created by José Molina on 02/09/25.
+//  Improved Implementation
 //
 
 import Foundation
 
-struct HTTPClient {
-    func getReports(status: String? = nil, userId: Int? = nil) async throws -> [ReportDTO] {
-        var urlString = URLEndpoints.reports
+// MARK: - Network Error Types
 
-        var queryItems: [String] = []
+enum NetworkError: LocalizedError {
+    case invalidURL
+    case unauthorized
+    case serverError(statusCode: Int, message: String?)
+    case decodingError(Error)
+    case networkFailure(Error)
+    case tokenMissing
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "The URL is invalid"
+        case .unauthorized:
+            return "Authentication required. Please log in again."
+        case .serverError(let code, let message):
+            return "Server error (\(code)): \(message ?? "Unknown error")"
+        case .decodingError(let error):
+            return "Failed to parse response: \(error.localizedDescription)"
+        case .networkFailure(let error):
+            return "Network request failed: \(error.localizedDescription)"
+        case .tokenMissing:
+            return "Access token not found"
+        }
+    }
+}
+
+// MARK: - HTTP Method
+
+enum HTTPMethod: String {
+    case get = "GET"
+    case post = "POST"
+    case delete = "DELETE"
+    case put = "PUT"
+    case patch = "PATCH"
+}
+
+// MARK: - Logger
+
+enum Logger {
+    enum LogLevel: String {
+        case debug = "DEBUG"
+        case info = "INFO"
+        case warning = "WARNING"
+        case error = "ERROR"
+    }
+    
+    static func log(_ message: String, level: LogLevel = .info) {
+        #if DEBUG
+        print("[\(level.rawValue)] \(message)")
+        #endif
+    }
+}
+
+// MARK: - Protocols
+
+protocol TokenStorageProtocol {
+    func get(identifier: String) -> String?
+    func save(token: String, identifier: String)
+    func remove(identifier: String)
+}
+
+protocol HTTPClientProtocol {
+    func getReports(status: String?, userId: Int?) async throws -> [ReportDTO]
+    func getCategories() async throws -> [CategoryDTO]
+    func createUpvote(reportId: Int) async throws -> Int
+    func deleteUpvote(reportId: Int) async throws -> Int
+    func getTotalUpvotes(reportId: Int) async throws -> Int
+    func loginUser(email: String, password: String) async throws -> UserLoginResponse
+    func registerUser(name: String, email: String, password: String) async throws -> RegisterResponse
+    func getUserProfile() async throws -> UserResponse
+}
+
+// MARK: - Supporting Types
+
+struct ErrorResponse: Decodable {
+    let message: String
+}
+
+private struct UpvoteRequest: Encodable {
+    let reportId: String
+    
+    init(reportId: Int) {
+        self.reportId = String(reportId)
+    }
+}
+
+private struct GetUpvotesRequest: Encodable {
+    let postId: String
+    
+    init(reportId: Int) {
+        self.postId = String(reportId)
+    }
+}
+
+// MARK: - URL Extensions
+
+extension URL {
+    func appendingQueryParameters(_ parameters: [String: String]) -> URL? {
+        guard !parameters.isEmpty else { return self }
+        
+        guard var components = URLComponents(url: self, resolvingAgainstBaseURL: false) else {
+            return nil
+        }
+        
+        components.queryItems = parameters.map {
+            URLQueryItem(name: $0.key, value: $0.value)
+        }
+        
+        return components.url
+    }
+}
+
+// MARK: - Network Configuration
+
+struct NetworkConfiguration {
+    let timeout: TimeInterval
+    let maxRetries: Int
+    
+    static let `default` = NetworkConfiguration(
+        timeout: 30,
+        maxRetries: 3
+    )
+}
+
+// MARK: - HTTP Client
+
+struct HTTPClient: HTTPClientProtocol {
+    
+    // MARK: - Properties
+    
+    private let session: URLSession
+    private let tokenStorage: TokenStorageProtocol
+    private let configuration: NetworkConfiguration
+    
+    // MARK: - Initialization
+    
+    init(
+        session: URLSession? = nil,
+        tokenStorage: TokenStorageProtocol = TokenStorage.shared,
+        configuration: NetworkConfiguration = .default
+    ) {
+        if let session = session {
+            self.session = session
+        } else {
+            let config = URLSessionConfiguration.default
+            config.timeoutIntervalForRequest = configuration.timeout
+            config.timeoutIntervalForResource = configuration.timeout * 2
+            config.waitsForConnectivity = true
+            self.session = URLSession(configuration: config)
+        }
+        
+        self.tokenStorage = tokenStorage
+        self.configuration = configuration
+    }
+    
+    // MARK: - Public Methods
+    
+    func getReports(status: String? = nil, userId: Int? = nil) async throws -> [ReportDTO] {
+        var parameters: [String: String] = [:]
+        
         if let status = status {
-            queryItems.append("status_id=\(status)")
+            parameters["status_id"] = status
         }
         if let userId = userId {
-            queryItems.append("userId=\(userId)")
+            parameters["userId"] = String(userId)
         }
-        if !queryItems.isEmpty {
-            urlString += "?" + queryItems.joined(separator: "&")
+        
+        guard let baseURL = URL(string: URLEndpoints.reports),
+              let url = baseURL.appendingQueryParameters(parameters) else {
+            throw NetworkError.invalidURL
         }
-
-        guard let url = URL(string: urlString) else {
-            throw URLError(.badURL)
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-
-        guard httpResponse.statusCode == 200 else {
-            throw URLError(.badServerResponse)
-        }
-
-        let reports = try JSONDecoder().decode([ReportDTO].self, from: data)
-        return reports
+        
+        let request = try buildRequest(
+            url: url,
+            method: .get
+        )
+        
+        Logger.log("Fetching reports with parameters: \(parameters)", level: .debug)
+        
+        return try await performRequest(request, expecting: [ReportDTO].self)
     }
-
+    
     func getCategories() async throws -> [CategoryDTO] {
         guard let url = URL(string: URLEndpoints.categories) else {
-            throw URLError(.badURL)
+            throw NetworkError.invalidURL
         }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-
-        guard httpResponse.statusCode == 200 else {
-            throw URLError(.badServerResponse)
-        }
-
-        let categories = try JSONDecoder().decode([CategoryDTO].self, from: data)
-        return categories
-    }
-
-    func createUpvote(reportId: Int) async throws -> Int {
-        guard let token = TokenStorage.get(identifier: "accessToken") else {
-            print("❌ No access token found")
-            throw URLError(.userAuthenticationRequired)
-        }
-
-        guard let url = URL(string: URLEndpoints.upvotes) else {
-            print("❌ Invalid URL: \(URLEndpoints.upvotes)")
-            throw URLError(.badURL)
-        }
-
-        print("📡 POST \(url.absoluteString)")
-        print("🔑 Using Bearer token: \(String(token.prefix(20)))...")
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-        let body = ["reportId": "\(reportId)"]
-        request.httpBody = try JSONEncoder().encode(body)
-        print("📦 Request body: \(body)")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            print("❌ Invalid response type")
-            throw URLError(.badServerResponse)
-        }
-
-        print("📥 Response status: \(httpResponse.statusCode)")
-
-        guard httpResponse.statusCode == 200 || httpResponse.statusCode == 201 else {
-            if let errorString = String(data: data, encoding: .utf8) {
-                print("❌ Server error response: \(errorString)")
-            }
-            throw URLError(.badServerResponse)
-        }
-
-        let result = try JSONDecoder().decode(UpvoteResponse.self, from: data)
-        print("✅ Decoded response - likes: \(result.likes)")
-        return result.likes
-    }
-
-    func deleteUpvote(reportId: Int) async throws -> Int {
-        guard let token = TokenStorage.get(identifier: "accessToken") else {
-            print("❌ No access token found")
-            throw URLError(.userAuthenticationRequired)
-        }
-
-        guard let url = URL(string: URLEndpoints.upvotes) else {
-            print("❌ Invalid URL: \(URLEndpoints.upvotes)")
-            throw URLError(.badURL)
-        }
-
-        print("📡 DELETE \(url.absoluteString)")
-        print("🔑 Using Bearer token: \(String(token.prefix(20)))...")
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-        let body = ["reportId": "\(reportId)"]
-        request.httpBody = try JSONEncoder().encode(body)
-        print("📦 Request body: \(body)")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            print("❌ Invalid response type")
-            throw URLError(.badServerResponse)
-        }
-
-        print("📥 Response status: \(httpResponse.statusCode)")
-
-        guard httpResponse.statusCode == 200 else {
-            if let errorString = String(data: data, encoding: .utf8) {
-                print("❌ Server error response: \(errorString)")
-            }
-            throw URLError(.badServerResponse)
-        }
-
-        let result = try JSONDecoder().decode(UpvoteResponse.self, from: data)
-        print("✅ Decoded response - likes: \(result.likes)")
-        return result.likes
-    }
-
-    func getTotalUpvotes(reportId: Int) async throws -> Int {
-        guard let token = TokenStorage.get(identifier: "accessToken") else {
-            throw URLError(.userAuthenticationRequired)
-        }
-
-        guard let url = URL(string: URLEndpoints.upvotesTotal) else {
-            throw URLError(.badURL)
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-        let body = ["postId": "\(reportId)"]
-        request.httpBody = try JSONEncoder().encode(body)
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-
-        guard httpResponse.statusCode == 200 else {
-            throw URLError(.badServerResponse)
-        }
-
-        let count = try JSONDecoder().decode(Int.self, from: data)
-        return count
-    }
-
-    func loginUser(email: String, password: String) async throws -> UserLoginResponse{
-        let userLoginRequest = UserLoginRequest(email: email, password: password)
-        let jsonData = try JSONEncoder().encode(userLoginRequest)
-        let url = URL(string: URLEndpoints.login)!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jsonData
-        let (data, response) = try await URLSession.shared.data(for: request)
-        let userLoginResponse =  try JSONDecoder().decode(UserLoginResponse.self, from: data)
-        return userLoginResponse
         
+        let request = try buildRequest(url: url, method: .get)
+        
+        Logger.log("Fetching categories", level: .debug)
+        
+        return try await performRequest(request, expecting: [CategoryDTO].self)
     }
+    
+    func createUpvote(reportId: Int) async throws -> Int {
+        guard let url = URL(string: URLEndpoints.upvotes) else {
+            throw NetworkError.invalidURL
+        }
+        
+        let body = UpvoteRequest(reportId: reportId)
+        let request = try buildRequest(
+            url: url,
+            method: .post,
+            body: body,
+            requiresAuth: true
+        )
+        
+        Logger.log("Creating upvote for report \(reportId)", level: .debug)
+        
+        let response = try await performRequest(request, expecting: UpvoteResponse.self)
+        
+        Logger.log("Upvote created. Total likes: \(response.likes)", level: .info)
+        
+        return response.likes
+    }
+    
+    func deleteUpvote(reportId: Int) async throws -> Int {
+        guard let url = URL(string: URLEndpoints.upvotes) else {
+            throw NetworkError.invalidURL
+        }
+        
+        let body = UpvoteRequest(reportId: reportId)
+        let request = try buildRequest(
+            url: url,
+            method: .delete,
+            body: body,
+            requiresAuth: true
+        )
+        
+        Logger.log("Deleting upvote for report \(reportId)", level: .debug)
+        
+        let response = try await performRequest(request, expecting: UpvoteResponse.self)
+        
+        Logger.log("Upvote deleted. Total likes: \(response.likes)", level: .info)
+        
+        return response.likes
+    }
+    
+    func getTotalUpvotes(reportId: Int) async throws -> Int {
+        guard let url = URL(string: URLEndpoints.upvotesTotal) else {
+            throw NetworkError.invalidURL
+        }
+        
+        let body = GetUpvotesRequest(reportId: reportId)
+        let request = try buildRequest(
+            url: url,
+            method: .post,
+            body: body,
+            requiresAuth: true
+        )
+        
+        Logger.log("Fetching total upvotes for report \(reportId)", level: .debug)
+        
+        return try await performRequest(request, expecting: Int.self)
+    }
+    
+    func loginUser(email: String, password: String) async throws -> UserLoginResponse {
+        guard let url = URL(string: URLEndpoints.login) else {
+            throw NetworkError.invalidURL
+        }
+        
+        let body = UserLoginRequest(email: email, password: password)
+        let request = try buildRequest(
+            url: url,
+            method: .post,
+            body: body
+        )
+        
+        Logger.log("Attempting login for user: \(email)", level: .debug)
+        
+        let response = try await performRequest(request, expecting: UserLoginResponse.self)
+        
+        Logger.log("Login successful", level: .info)
+        
+        return response
+    }
+    
     func registerUser(name: String, email: String, password: String) async throws -> RegisterResponse {
-        let dataRequest = UserRequest(email: email, name: name, password: password, role_id: "1")
-        let jsonData = try JSONEncoder().encode(dataRequest)
-        let url = URL(string: URLEndpoints.register)!
+        guard let url = URL(string: URLEndpoints.register) else {
+            throw NetworkError.invalidURL
+        }
+        
+        let body = UserRequest(
+            email: email,
+            name: name,
+            password: password,
+            role_id: "1"
+        )
+        
+        let request = try buildRequest(
+            url: url,
+            method: .post,
+            body: body
+        )
+        
+        Logger.log("Attempting registration for user: \(email)", level: .debug)
+        
+        let response = try await performRequest(request, expecting: RegisterResponse.self)
+        
+        Logger.log("Registration successful for user: \(response.user.name) (ID: \(response.user.id))", level: .info)
+        
+        return response
+    }
+    
+    func getUserProfile() async throws -> UserResponse {
+        guard let url = URL(string: URLEndpoints.users) else {
+            throw NetworkError.invalidURL
+        }
+        
+        let request = try buildRequest(
+            url: url,
+            method: .get,
+            requiresAuth: true
+        )
+        
+        Logger.log("Fetching user profile", level: .debug)
+        
+        return try await performRequest(request, expecting: UserResponse.self)
+    }
+    
+    // MARK: - Private Methods
+    
+    private func buildRequest(
+        url: URL,
+        method: HTTPMethod,
+        body: Encodable? = nil,
+        requiresAuth: Bool = false
+    ) throws -> URLRequest {
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = method.rawValue
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jsonData
-
-        print("📡 POST \(url.absoluteString)")
-        print("📦 Request body: \(String(data: jsonData, encoding: .utf8) ?? "")")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            print("❌ Invalid response type")
-            throw URLError(.badServerResponse)
+        
+        if requiresAuth {
+            let token = try requireAuthToken()
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
-
-        print("📥 Response status: \(httpResponse.statusCode)")
-
-        guard httpResponse.statusCode == 200 || httpResponse.statusCode == 201 else {
-            if let errorString = String(data: data, encoding: .utf8) {
-                print("❌ Server error response: \(errorString)")
-
-                // Try to parse error message from backend
-                if let errorJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let message = errorJson["message"] as? String {
-                    throw NSError(domain: "Registration", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: message])
-                }
+        
+        if let body = body {
+            request.httpBody = try JSONEncoder().encode(body)
+        }
+        
+        return request
+    }
+    
+    private func requireAuthToken() throws -> String {
+        guard let token = tokenStorage.get(identifier: "accessToken") else {
+            Logger.log("Access token not found", level: .error)
+            throw NetworkError.tokenMissing
+        }
+        return token
+    }
+    
+    private func performRequest<T: Decodable>(
+        _ request: URLRequest,
+        expecting type: T.Type
+    ) async throws -> T {
+        do {
+            let (data, response) = try await session.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw NetworkError.serverError(statusCode: 0, message: "Invalid response type")
             }
-            throw URLError(.badServerResponse)
+            
+            Logger.log("Response status: \(httpResponse.statusCode)", level: .debug)
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                let errorMessage = try? JSONDecoder()
+                    .decode(ErrorResponse.self, from: data)
+                    .message
+                
+                Logger.log("Server error: \(errorMessage ?? "Unknown")", level: .error)
+                
+                throw NetworkError.serverError(
+                    statusCode: httpResponse.statusCode,
+                    message: errorMessage
+                )
+            }
+            
+            let decoder = JSONDecoder()
+            let result = try decoder.decode(T.self, from: data)
+            
+            return result
+            
+        } catch let error as NetworkError {
+            throw error
+        } catch let error as DecodingError {
+            Logger.log("Decoding error: \(error)", level: .error)
+            throw NetworkError.decodingError(error)
+        } catch {
+            Logger.log("Network failure: \(error)", level: .error)
+            throw NetworkError.networkFailure(error)
         }
+    }
+}
 
-        let registerResponse = try JSONDecoder().decode(RegisterResponse.self, from: data)
-        print("✅ User registered successfully: \(registerResponse.user.name) with ID: \(registerResponse.user.id)")
-        return registerResponse
+// MARK: - TokenStorage Implementation
+
+class TokenStorage: TokenStorageProtocol {
+    static let shared = TokenStorage()
+    
+    private init() {}
+    
+    func get(identifier: String) -> String? {
+        // Original implementation - replace with your actual implementation
+        return UserDefaults.standard.string(forKey: identifier)
+    }
+    
+    func save(token: String, identifier: String) {
+        UserDefaults.standard.set(token, forKey: identifier)
+    }
+    
+    func remove(identifier: String) {
+        UserDefaults.standard.removeObject(forKey: identifier)
     }
 }
