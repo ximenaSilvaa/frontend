@@ -12,8 +12,11 @@ struct URLEndpoints {
     static let login: String = String(server+"/auth/login")
     static let register: String = String(server+"/users/register")
     static let users: String = String(server+"/users")
+    static let userReports: String = String(server+"/users/reports")
     static let reports: String = String(server+"/reports")
     static let categories: String = String(server+"/categories")
     static let upvotes: String = String(server+"/upvotes")
     static let upvotesTotal: String = String(server+"/upvotes/total")
+    static let uploadProfileImage: String = String(server+"/images/profile-pictures")
+    static let userPostInfo: String = String(server+"/users/post-info")
 }

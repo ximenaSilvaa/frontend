@@ -77,6 +77,9 @@ protocol HTTPClientProtocol {
     func loginUser(email: String, password: String) async throws -> UserLoginResponse
     func registerUser(name: String, email: String, password: String) async throws -> RegisterResponse
     func getUserProfile() async throws -> UserResponse
+    func updateUserProfile(name: String?, email: String?, username: String?, imagePath: String?) async throws -> UserResponse
+    func uploadProfileImage(imageData: Data) async throws -> String
+    func getUserPostInfo() async throws -> UserPostInfoDTO
 }
 
 // MARK: - Supporting Types
@@ -315,18 +318,107 @@ struct HTTPClient: HTTPClientProtocol {
         guard let url = URL(string: URLEndpoints.users) else {
             throw NetworkError.invalidURL
         }
-        
+
         let request = try buildRequest(
             url: url,
             method: .get,
             requiresAuth: true
         )
-        
+
         Logger.log("Fetching user profile", level: .debug)
-        
+
         return try await performRequest(request, expecting: UserResponse.self)
     }
-    
+
+    func getUserReports() async throws -> [ReportDTO] {
+        guard let url = URL(string: URLEndpoints.userReports) else {
+            throw NetworkError.invalidURL
+        }
+
+        let request = try buildRequest(
+            url: url,
+            method: .get,
+            requiresAuth: true
+        )
+
+        Logger.log("Fetching user reports", level: .debug)
+
+        return try await performRequest(request, expecting: [ReportDTO].self)
+    }
+
+    func updateUserProfile(name: String?, email: String?, username: String?, imagePath: String? = nil) async throws -> UserResponse {
+        guard let url = URL(string: URLEndpoints.users) else {
+            throw NetworkError.invalidURL
+        }
+
+        let body = UpdateUserRequest(email: email, name: name, username: username, image_path: imagePath)
+
+        let request = try buildRequest(
+            url: url,
+            method: .put,
+            body: body,
+            requiresAuth: true
+        )
+
+        Logger.log("Updating user profile", level: .debug)
+
+        let response = try await performRequest(request, expecting: UserResponse.self)
+
+        Logger.log("Profile updated successfully", level: .info)
+
+        return response
+    }
+
+    func uploadProfileImage(imageData: Data) async throws -> String {
+        guard let url = URL(string: URLEndpoints.uploadProfileImage) else {
+            throw NetworkError.invalidURL
+        }
+
+        let token = try requireAuthToken()
+
+        let boundary = UUID().uuidString
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        var body = Data()
+
+        // Add image data
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"profile.jpg\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+        body.append(imageData)
+        body.append("\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+
+        request.httpBody = body
+
+        Logger.log("Uploading profile image", level: .debug)
+
+        let response = try await performRequest(request, expecting: ImageUploadResponse.self)
+
+        Logger.log("Profile image uploaded successfully: \(response.path)", level: .info)
+
+        return response.path
+    }
+
+    func getUserPostInfo() async throws -> UserPostInfoDTO {
+        guard let url = URL(string: URLEndpoints.userPostInfo) else {
+            throw NetworkError.invalidURL
+        }
+
+        let request = try buildRequest(
+            url: url,
+            method: .get,
+            requiresAuth: true
+        )
+
+        Logger.log("Fetching user post info", level: .debug)
+
+        return try await performRequest(request, expecting: UserPostInfoDTO.self)
+    }
+
     // MARK: - Private Methods
     
     private func buildRequest(

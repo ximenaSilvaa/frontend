@@ -2,7 +2,7 @@
 //  UpvoteDTO.swift
 //  TemplateReto451
 //
-//  Created by Claude Code
+//  Created by Ximena Silva Bárcena
 //
 
 import Foundation

@@ -2,7 +2,7 @@
 //  LoginDTO.swift
 //  TemplateReto451
 //
-//  Created by José Molina on 09/09/25.
+//  Created by Ximena Silva Bárcena on 09/09/25.
 //
 
 import Foundation

@@ -2,7 +2,7 @@
 //  UserRegistrationDTO.swift
 //  TemplateReto451
 //
-//  Created by José Molina on 02/09/25.
+//  Created by Ximena Silva Bárcena on 02/09/25.
 //
 
 import Foundation
@@ -37,4 +37,22 @@ struct UserResponse: Codable {
 struct RegisterResponse: Codable {
     let user: UserResponse
     let settings: [UserSettingsResponse]
+}
+
+struct UpdateUserRequest: Codable {
+    let email: String?
+    let name: String?
+    let username: String?
+    let image_path: String?
+
+    init(email: String? = nil, name: String? = nil, username: String? = nil, image_path: String? = nil) {
+        self.email = email
+        self.name = name
+        self.username = username
+        self.image_path = image_path
+    }
+}
+
+struct ImageUploadResponse: Codable {
+    let path: String
 }

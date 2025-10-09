@@ -36,7 +36,7 @@ struct ComponentReport: View {
     private func loadLikeData() async {
         do {
             let count = try await httpClient.getTotalUpvotes(reportId: report.id)
-            likeCount = count
+            likeCount = max(0, count) // Ensure non-negative count
 
             // Check if user has liked (stored locally for now)
             isLiked = UserDefaults.standard.bool(forKey: "liked_\(report.id)")
@@ -50,7 +50,7 @@ struct ComponentReport: View {
 
     private func toggleLike() {
         guard !isUpdatingLike else {
-            print("⚠️ Already updating like, ignoring tap")
+            print("Already updating like, ignoring tap")
             return
         }
 
@@ -63,23 +63,23 @@ struct ComponentReport: View {
                 let newCount: Int
                 if isLiked {
                     // Unlike
-                    print("🔄 Sending DELETE request to remove like for report \(report.id)")
+                    print("Sending DELETE request to remove like for report \(report.id)")
                     newCount = try await httpClient.deleteUpvote(reportId: report.id)
-                    print("✅ Successfully removed like. New count: \(newCount)")
+                    print("Successfully removed like. New count: \(newCount)")
                     isLiked = false
                     UserDefaults.standard.set(false, forKey: "liked_\(report.id)")
                 } else {
                     // Like
-                    print("🔄 Sending POST request to add like for report \(report.id)")
+                    print("Sending POST request to add like for report \(report.id)")
                     newCount = try await httpClient.createUpvote(reportId: report.id)
-                    print("✅ Successfully added like. New count: \(newCount)")
+                    print("Successfully added like. New count: \(newCount)")
                     isLiked = true
                     UserDefaults.standard.set(true, forKey: "liked_\(report.id)")
                 }
                 likeCount = newCount
             } catch {
-                print("❌ Error toggling like: \(error)")
-                print("❌ Error details: \(error.localizedDescription)")
+                print("Error toggling like: \(error)")
+                print("Error details: \(error.localizedDescription)")
                 // Revert to previous state on error
                 isLiked = previousLikeState
                 likeCount = previousCount
@@ -172,8 +172,12 @@ struct ComponentReport: View {
         .padding()
         .background(Color.white)
         .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.gray.opacity(0.15), lineWidth: 1)
+        )
         .frame(width: 350)
-        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         .onAppear {
             Task {
                 await loadLikeData()
@@ -199,7 +203,7 @@ struct Report: View {
     private func loadLikeData() async {
         do {
             let count = try await httpClient.getTotalUpvotes(reportId: report.id)
-            likeCount = count
+            likeCount = max(0, count) // Ensure non-negative count
 
             // Check if user has liked (stored locally for now)
             isLiked = UserDefaults.standard.bool(forKey: "liked_\(report.id)")
@@ -213,7 +217,7 @@ struct Report: View {
 
     private func toggleLike() {
         guard !isUpdatingLike else {
-            print("⚠️ Already updating like, ignoring tap")
+            print("Already updating like, ignoring tap")
             return
         }
 
@@ -226,23 +230,23 @@ struct Report: View {
                 let newCount: Int
                 if isLiked {
                     // Unlike
-                    print("🔄 Sending DELETE request to remove like for report \(report.id)")
+                    print("Sending DELETE request to remove like for report \(report.id)")
                     newCount = try await httpClient.deleteUpvote(reportId: report.id)
-                    print("✅ Successfully removed like. New count: \(newCount)")
+                    print("Successfully removed like. New count: \(newCount)")
                     isLiked = false
                     UserDefaults.standard.set(false, forKey: "liked_\(report.id)")
                 } else {
                     // Like
-                    print("🔄 Sending POST request to add like for report \(report.id)")
+                    print("Sending POST request to add like for report \(report.id)")
                     newCount = try await httpClient.createUpvote(reportId: report.id)
-                    print("✅ Successfully added like. New count: \(newCount)")
+                    print("Successfully added like. New count: \(newCount)")
                     isLiked = true
                     UserDefaults.standard.set(true, forKey: "liked_\(report.id)")
                 }
                 likeCount = newCount
             } catch {
-                print("❌ Error toggling like: \(error)")
-                print("❌ Error details: \(error.localizedDescription)")
+                print("Error toggling like: \(error)")
+                print("Error details: \(error.localizedDescription)")
                 // Revert to previous state on error
                 isLiked = previousLikeState
                 likeCount = previousCount
@@ -333,6 +337,7 @@ struct Report: View {
             }
             .padding()
             .frame(width: 350)
+            .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
         }
         .onAppear {
             Task {
@@ -367,3 +372,4 @@ struct ComponentReport_Previews: PreviewProvider {
         .padding()
     }
 }
+

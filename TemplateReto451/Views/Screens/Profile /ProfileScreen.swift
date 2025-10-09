@@ -12,6 +12,8 @@ struct ProfileScreen: View {
 
     @State private var userProfile = UserProfileDTO.sample
     @State private var userData: UserResponse?
+    @State private var userReports: [ReportDTO] = []
+    @State private var userPostInfo: UserPostInfoDTO?
     @State private var isLoading = false
     @State private var errorMessage: String?
 
@@ -102,7 +104,7 @@ struct ProfileScreen: View {
 
                     HStack(spacing: 20) {
                         StatisticItem(
-                            number: userProfile.stats.reports,
+                            number: userPostInfo?.totalReports ?? userProfile.stats.reports,
                             label: "Reportes",
                             color: Color.brandAccent
                         )
@@ -112,7 +114,7 @@ struct ProfileScreen: View {
                             .frame(width: 1, height: 60)
 
                         StatisticItem(
-                            number: userProfile.stats.protectedPeople,
+                            number: userPostInfo?.protectedPeople ?? userProfile.stats.protectedPeople,
                             label: "Personas protegidas",
                             color: Color.brandAccent
                         )
@@ -122,7 +124,7 @@ struct ProfileScreen: View {
                             .frame(width: 1, height: 60)
 
                         StatisticItem(
-                            number: userProfile.stats.inProcess,
+                            number: userPostInfo?.inProcess ?? userProfile.stats.inProcess,
                             label: "En proceso",
                             color: Color.brandAccent
                         )
@@ -136,12 +138,49 @@ struct ProfileScreen: View {
                 Divider()
                     .padding(.horizontal)
 
-                // Sample Report
-                ComponentReport(
-                    report: ReportDTO.sample,
-                    size: .small
-                )
-                .padding(.horizontal)
+                // User Reports Section
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Text("Mis Reportes")
+                            .font(.headline)
+                            .foregroundColor(Color.brandPrimary)
+
+                        Spacer()
+
+                        if userReports.count > 5 {
+                            NavigationLink(destination: UserAllReportsScreen(reports: userReports)) {
+                                Text("Ver todos")
+                                    .font(.subheadline)
+                                    .foregroundColor(Color.brandAccent)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+
+                    if userReports.isEmpty {
+                        // Empty State
+                        VStack(spacing: 12) {
+                            Image(systemName: "doc.text.magnifyingglass")
+                                .font(.system(size: 50))
+                                .foregroundColor(.gray.opacity(0.5))
+
+                            Text("No tienes reportes aún")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 40)
+                    } else {
+                        // Display up to 5 reports
+                        ForEach(Array(userReports.prefix(5)), id: \.id) { report in
+                            ComponentReport(
+                                report: report,
+                                size: .small
+                            )
+                            .padding(.horizontal)
+                        }
+                    }
+                }
 
                 Spacer()
             }
@@ -151,10 +190,8 @@ struct ProfileScreen: View {
             await fetchUserProfile()
         }
         .onAppear {
-            if userData == nil {
-                Task {
-                    await fetchUserProfile()
-                }
+            Task {
+                await fetchUserProfile()
             }
         }
     }
@@ -164,7 +201,15 @@ struct ProfileScreen: View {
         errorMessage = nil
 
         do {
-            userData = try await httpClient.getUserProfile()
+            // Fetch profile, reports, and post info in parallel
+            async let profile = httpClient.getUserProfile()
+            async let reports = httpClient.getUserReports()
+            async let postInfo = httpClient.getUserPostInfo()
+
+            userData = try await profile
+            userReports = try await reports
+            userPostInfo = try await postInfo
+
             isLoading = false
         } catch {
             errorMessage = "Error loading profile"
