@@ -9,7 +9,7 @@ import Foundation
 
 
 struct UserLoginRequest: Codable {
-    let email, password: String
+    let email, password, type: String
 }
 
 struct UserLoginResponse: Decodable {

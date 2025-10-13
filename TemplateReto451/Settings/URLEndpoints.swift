@@ -19,4 +19,5 @@ struct URLEndpoints {
     static let upvotesTotal: String = String(server+"/upvotes/total")
     static let uploadProfileImage: String = String(server+"/images/profile-pictures")
     static let userPostInfo: String = String(server+"/users/post-info")
+    static let userSettingsInfo: String = String(server+"/users/settings-info")
 }

@@ -104,6 +104,8 @@ private struct GetUpvotesRequest: Encodable {
     }
 }
 
+struct EmptyResponse: Decodable {}
+
 // MARK: - URL Extensions
 
 extension URL {
@@ -271,7 +273,7 @@ struct HTTPClient: HTTPClientProtocol {
             throw NetworkError.invalidURL
         }
         
-        let body = UserLoginRequest(email: email, password: password)
+        let body = UserLoginRequest(email: email, password: password, type: "mobile")
         let request = try buildRequest(
             url: url,
             method: .post,
@@ -418,6 +420,41 @@ struct HTTPClient: HTTPClientProtocol {
 
         return try await performRequest(request, expecting: UserPostInfoDTO.self)
     }
+    
+    // MARK: - User Settings
+
+    func getUserSettingsInfo() async throws -> SettingsResponseDTO {
+        guard let url = URL(string: URLEndpoints.userSettingsInfo) else {
+            throw NetworkError.invalidURL
+        }
+
+        let request = try buildRequest(
+            url: url,
+            method: .get,
+            requiresAuth: true
+        )
+
+        Logger.log("Fetching user settings info", level: .debug)
+        return try await performRequest(request, expecting: SettingsResponseDTO.self)
+    }
+
+    func updateUserSettingsInfo(_ settings: SettingsRequestDTO) async throws {
+        guard let url = URL(string: URLEndpoints.userSettingsInfo) else {
+            throw NetworkError.invalidURL
+        }
+
+        let request = try buildRequest(
+            url: url,
+            method: .put,
+            body: settings,
+            requiresAuth: true
+        )
+
+        Logger.log("Updating user settings info", level: .debug)
+        _ = try await performRequest(request, expecting: EmptyResponse.self)
+    }
+
+
 
     // MARK: - Private Methods
     

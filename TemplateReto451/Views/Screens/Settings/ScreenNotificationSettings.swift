@@ -4,7 +4,6 @@
 //
 //  Created by Ana Martinez on 16/09/25.
 //
-
 import SwiftUI
 
 struct ScreenNotificationSettings: View {
@@ -14,7 +13,6 @@ struct ScreenNotificationSettings: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                // Header with back arrow
                 HStack {
                     Button(action: {
                         dismiss()
@@ -34,15 +32,13 @@ struct ScreenNotificationSettings: View {
 
                     Spacer()
 
-                    // Invisible spacer to center the title
+                    
                     Image(systemName: "chevron.left")
                         .font(.title2)
                         .opacity(0)
                         .padding(.trailing)
                 }
                 
-                // Usamos métodos seguros para cambiar el estado
-    
                 sectionToggle(
                     icon: "bell",
                     text: "Activar todas",
@@ -127,7 +123,6 @@ struct ScreenNotificationSettings: View {
     }
 }
 
-// Changed from #Preview to struct PreviewProvider
 struct ScreenNotificationSettings_Previews: PreviewProvider {
     static var previews: some View {
         ScreenNotificationSettings()
