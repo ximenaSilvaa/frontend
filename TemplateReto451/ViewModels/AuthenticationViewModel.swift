@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AuthenticationController{
+struct AuthenticationViewModel{
     let httpClient: HTTPClient
 
     func registerUser(name: String, email: String, password: String) async throws -> RegisterResponse {

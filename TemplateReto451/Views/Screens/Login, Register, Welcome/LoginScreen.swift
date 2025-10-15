@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LoginScreen: View {
-    @Environment(\.authenticationController) var authenticationController
+    @Environment(\.authenticationViewModel) var authenticationViewModel
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var isLoading: Bool = false
@@ -21,7 +21,7 @@ struct LoginScreen: View {
         isLoading = true
 
         do {
-            isLoggedIn = try await authenticationController.loginUser(email: email, password: password)
+            isLoggedIn = try await authenticationViewModel.loginUser(email: email, password: password)
             isLoading = false
         } catch {
             isLoading = false

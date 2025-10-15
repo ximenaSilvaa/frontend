@@ -8,7 +8,7 @@
 import Foundation
 
 @MainActor
-class NotificationSettingsController: ObservableObject {
+class NotificationSettingsViewModel: ObservableObject {
     @Published var isActivated: Bool = true
     @Published var isReactionsEnabled: Bool = true
     @Published var isReviewEnabled: Bool = true

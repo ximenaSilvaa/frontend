@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct WelcomeScreen: View {
-    @Environment(\.authenticationController) var authenticationController
+    @Environment(\.authenticationViewModel) var authenticationViewModel
     @State private var isActive = false
     @State private var isValidatingToken = false
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
@@ -39,7 +39,7 @@ struct WelcomeScreen: View {
                 if isLoggedIn {
                     isValidatingToken = true
                     do {
-                        let isValid = try await authenticationController.validateToken()
+                        let isValid = try await authenticationViewModel.validateToken()
                         if !isValid {
                             // Token is invalid, reset login state
                             isLoggedIn = false

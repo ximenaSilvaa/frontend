@@ -9,58 +9,7 @@ import SwiftUI
 import Charts
 
 struct DashboardScreen: View {
-    
-    // MARK: - Datos
-    let totalReports = 128
-    let approvedReports = 95
-    let rejectedReports = 12
-    let pendingReports = 21
-    let protectedPeople = 860
-    let users = 900
-    
-    let topCategoriesReports = [
-        ("Eléctrodomesticos", 45),
-        ("Ropa", 35),
-        ("Carros", 28),
-        ("Prestamos", 15),
-        ("Otros", 5)
-    ]
-    
-    let reportsPerMonth = [
-        ("Jan", 10),
-        ("Feb", 15),
-        ("Mar", 12),
-        ("Apr", 20),
-        ("May", 18),
-        ("Jun", 22),
-        ("Jul", 5),
-        ("Aug", 10),
-        ("Sep", 17),
-        ("Oct", 9),
-        ("Nov", 8),
-        ("Dec", 23),
-    ]
-
-    let topUsers = [
-        ("Ana", 50),
-        ("Xime", 42),
-        ("Arti", 38),
-        ("Ro", 32),
-    ]
-    
-    let recentAlerts = [
-        "Phishing en tienda online",
-        "Fraude financiero en prestamos.mx",
-        "Compra inefectiva tienda trend clothes",
-        "Alerta: aumento en fraudes financieros en invierte.mx",
-    ]
-
-    let topReportsMonth = [
-        ("Phishing en tienda online", 32),
-        ("Fraude financiero en prestamos.mx", 23),
-        ("Compra inefectiva tienda trend clothes", 20),
-        ("Alerta: aumento en fraudes financieros en invierte.mx",11),
-    ]
+    @StateObject private var viewModel = DashboardViewModel()
     
     // MARK: - Funciones
     func colorLevel(index: Int, total: Int) -> Double {
@@ -97,31 +46,36 @@ struct DashboardScreen: View {
     }
 
     struct TopReportsView: View {
-        let topReportsMonth: [(String, Int)]
+        let topReportsMonth: [(Int, String, Int)]
 
         var body: some View {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Top reportes del mes")
-                    .font(.title2)
-                    .bold()
-                    .foregroundColor(.brandAccent)
-                    .padding(.bottom, 8)
+            NavigationStack {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Top reportes del mes")
+                        .font(.title2)
+                        .bold()
+                        .foregroundColor(.brandAccent)
+                        .padding(.bottom, 8)
 
-                let maxValue = topReportsMonth.map { $0.1 }.max() ?? 1
-                let maxCountWithMargin = Int(Double(maxValue) * 1.1)
+                    let maxValue = topReportsMonth.map { $0.2 }.max() ?? 1
+                    let maxCountWithMargin = Int(Double(maxValue) * 1.1)
 
-                ForEach(topReportsMonth, id: \.0) { titleReport, count in
-                    BarView(
-                        titleReport: titleReport,
-                        count: count,
-                        maxCount: maxCountWithMargin,
-                        text: "\(count) likes"
-                    )
+                    ForEach(topReportsMonth, id: \.0) { reportId, title, count in
+                        BarView(
+                            reportId: reportId,
+                            titleReport: title,
+                            count: count,
+                            maxCount: maxCountWithMargin,
+                            text: "\(count) likes"
+                        )
+                    }
                 }
+                .padding()
             }
-            .padding()
         }
     }
+
+    
 
     struct AchievementsView: View {
         let approvedReports: Int
@@ -251,63 +205,77 @@ struct DashboardScreen: View {
     }
 
     struct AlertRow: View {
-        let alert: String
+        let alert: (Int, String)
         let isLast: Bool
-        
+
+        @State private var reportDTO: ReportDTO? = nil
+        @State private var isLoading = false
+        private let httpClient = HTTPClient()
+
         var body: some View {
-            VStack(alignment: .leading) {
-                NavigationLink(destination: Report(report: ReportDTO(
-                    id: 1,
-                    title: "titulo",
-                    image: "reporsample",
-                    description: "description",
-                    user_name: "User",
-                    created_by: 1,
-                    user_image: "userprofile",
-                    report_url: "/report-pictures/57c0a3a48e923d8bb9e94b3a8ff743a58e9c4e71d4ccf0e6e2e3d513a7f49fdd.jpg",
-                    categories: [1, 2] ))) {
-                    HStack(alignment: .top, spacing: 8) {
-                        Text(alert)
+            VStack(alignment: .leading, spacing: 8) {
+                Button {
+                    Task { await loadReport() }
+                } label: {
+                    HStack {
+                        Text(alert.1)
                             .foregroundColor(.brandPrimary)
-                            .font(.subheadline)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .multilineTextAlignment(.leading)
                         Spacer()
                         Image(systemName: "chevron.right")
                             .foregroundColor(.gray)
-                            .padding(.top, 2)
                     }
-                    .contentShape(Rectangle())
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
                     .padding(.vertical, 8)
                 }
-                
+                .disabled(isLoading)
+
                 if !isLast {
                     Divider()
-                        .background(Color.brandAccent)
+                        .background(Color.gray.opacity(0.3))
                 }
             }
+            .navigationDestination(item: $reportDTO) { report in
+                Report(report: report)
+            }
+        }
+
+        private func loadReport() async {
+            guard !isLoading else { return }
+            isLoading = true
+
+            do {
+                let reports = try await httpClient.getIdReport(id: alert.0)
+                if let first = reports.first {
+                    await MainActor.run { reportDTO = first }
+                }
+            } catch {
+                print("Error cargando reporte con id \(alert.0): \(error)")
+            }
+
+            isLoading = false
         }
     }
 
+
     struct RecentAlertsView: View {
-        let recentAlerts: [String]
+        let recentAlerts: [(Int, String)]
 
         var body: some View {
-            VStack(alignment: .leading) {
-                Text("Alertas recientes")
-                    .font(.title2)
-                    .bold()
-                    .foregroundColor(.brandAccent)
+            NavigationStack {
+                VStack(alignment: .leading) {
+                    Text("Alertas recientes")
+                        .font(.title2)
+                        .bold()
+                        .foregroundColor(.brandAccent)
 
-                ForEach(Array(recentAlerts.enumerated()), id: \.element) { index, alert in
-                    AlertRow(alert: alert, isLast: index == recentAlerts.count - 1)
+                    ForEach(Array(recentAlerts.enumerated()), id: \.element.0) { index, alert in
+                        AlertRow(alert: alert, isLast: index == recentAlerts.count - 1)
+                    }
                 }
+                .padding()
+                .background(Color.gray.opacity(0.06))
+                .cornerRadius(12)
+                .padding(.horizontal)
             }
-            .padding()
-            .background(Color.gray.opacity(0.06))
-            .cornerRadius(12)
-            .padding(.horizontal)
         }
     }
 
@@ -395,45 +363,36 @@ struct DashboardScreen: View {
         }
     }
 
-struct BarView: View {
-    let titleReport: String
-    let count: Int
-    let maxCount: Int
-    let text: String
 
-    var body: some View {
-        
-        VStack(alignment: .leading, spacing: 6) {
-            // Obtenido con el id
-            NavigationLink(destination: Report(report:
-                ReportDTO(
-                    id: 1,
-                    title: "Título de reporte de prueba",
-                    image: "report-pictures/ejemplo.jpg",
-                    description: "Esta es una descripción de ejemplo para ver cómo se muestra el reporte.",
-                    user_name: "Usuario de ejemplo",
-                    created_by: 1, // id del creador
-                    user_image: "user-pictures/avatar.jpg", // path relativo o nombre de archivo
-                    report_url: "https://ejemplo.com/reporte",
-                    categories: [1, 2]
-                )
-            )) {
-                HStack {
-                    Text(titleReport)
-                        .font(.subheadline)
-                        .foregroundColor(.brandPrimary.opacity(0.8))
-                        .fixedSize(horizontal: false, vertical: true)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
+    struct BarView: View {
+        let reportId: Int
+        let titleReport: String
+        let count: Int
+        let maxCount: Int
+        let text: String
+
+        @State private var reportDTO: ReportDTO? = nil
+        @State private var isLoading = false
+        private let httpClient = HTTPClient()
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 6) {
+                Button {
+                    Task { await loadReport() }
+                } label: {
+                    HStack {
+                        Text(titleReport)
+                            .font(.subheadline)
+                            .foregroundColor(.brandPrimary.opacity(0.8))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.gray)
+                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
+                .disabled(isLoading)
 
-
-            HStack {
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
+                HStack {
+                    GeometryReader { geo in
                         RoundedRectangle(cornerRadius: 10)
                             .fill(Color.brandSecondary)
                             .frame(
@@ -441,21 +400,40 @@ struct BarView: View {
                                 height: 14
                             )
                     }
+                    .frame(height: 14)
+
+                    Text(text)
+                        .font(.caption)
+                        .foregroundColor(.brandPrimary.opacity(0.6))
+                        .frame(width: 60, alignment: .trailing)
                 }
                 .frame(height: 14)
-
-                Text(text)
-                    .font(.caption)
-                    .foregroundColor(.brandPrimary.opacity(0.6))
-                    .frame(width: 60, alignment: .trailing)
             }
-            .frame(height: 14)
+            .padding(.vertical, 4)
+            .navigationDestination(item: $reportDTO) { report in
+                Report(report: report)
+            }
         }
-        .padding(.vertical, 4)
+
+        private func loadReport() async {
+            guard !isLoading else { return }
+            isLoading = true
+
+            do {
+                let reports = try await httpClient.getIdReport(id: reportId)
+                if let first = reports.first {
+                    await MainActor.run { reportDTO = first }
+                }
+            } catch {
+                print("Error cargando reporte \(reportId): \(error)")
+            }
+
+            isLoading = false
+        }
     }
-}
 
 
+    
 struct AchievementRow: View {
     let icon: String
     let title: String
@@ -485,38 +463,90 @@ struct AchievementRow: View {
 
     
     
-    // MARK: - Body principal
+    // MARK: - Body
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    HeaderView()
-                    
-                    ProgressCardsView(totalReports: totalReports, protectedPeople: protectedPeople)
-                    
-                    TopReportsView(topReportsMonth: topReportsMonth)
-                    
-                    AchievementsView(approvedReports: approvedReports, protectedPeople: protectedPeople, users: users)
-                    
-                    ReportStatusChartView(approvedReports: approvedReports, rejectedReports: rejectedReports, pendingReports: pendingReports)
-                    
-                    ReportsByCategoryView(topCategoriesReports: topCategoriesReports, colorLevel: colorLevel)
-                    
-                    RecentAlertsView(recentAlerts: recentAlerts)
-                    
-                    ReportsPerMonthView(reportsPerMonth: reportsPerMonth)
-                    
-                    TopUsersView(topUsers: topUsers)
-                    
-                    FooterView()
+            NavigationStack {
+                ScrollView {
+                    VStack(spacing: 24) {
+                        HeaderView()
+
+                        if viewModel.isLoading {
+                            ProgressView("Cargando dashboard...")
+                                .padding(.top, 40)
+                        } else if let dashboard = viewModel.dashboard {
+                            
+                            ProgressCardsView(
+                                totalReports: dashboard.stats.totalReports,
+                                    protectedPeople: dashboard.stats.protectedPeople
+                            )
+                            
+                            TopReportsView(
+                                topReportsMonth: viewModel.topReportsMonth.map {
+                                    ($0.id,$0.title, $0.upvotes)
+                                }
+                            )
+                            Spacer()
+                            AchievementsView(
+                                approvedReports: dashboard.stats.approvedReports,
+                                protectedPeople: dashboard.stats.protectedPeople,
+                                users: dashboard.stats.totalUsers
+                            )
+                            Spacer()
+
+                            ReportStatusChartView(
+                                approvedReports: dashboard.stats.approvedReports,
+                                rejectedReports: dashboard.stats.rejectedReports,
+                                pendingReports: dashboard.stats.pendingReports
+                            )
+                            Spacer()
+
+                            ReportsByCategoryView(
+                                topCategoriesReports: dashboard.topCategoriesReports.map {
+                                    ($0.name, $0.totalReports)
+                                },
+                                colorLevel: colorLevel
+                            )
+
+                            Spacer()
+                            RecentAlertsView(
+                                recentAlerts: viewModel.recentAlerts.map { ($0.id, $0.title) }
+                            )
+                            Spacer()
+                            
+                            ReportsPerMonthView(
+                                reportsPerMonth: dashboard.reportsPerMonth.map {
+                                    ($0.month.monthAbbreviation(), $0.totalReports)
+                                }
+                            )
+
+                            Spacer()
+
+
+                            TopUsersView(
+                                topUsers: dashboard.topUsers.map {
+                                    ($0.name, $0.totalReports)
+                                }
+                            )
+
+                            
+                            FooterView()
+                            
+                        } else if let error = viewModel.errorMessage {
+                            Text("Error: \(error)")
+                                .foregroundColor(.red)
+                                .padding()
+                        }
+                    }
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
+                .navigationTitle("Dashboard")
+                .navigationBarTitleDisplayMode(.inline)
+                .task {
+                    await viewModel.fetchDashboard()
+                }
             }
-            .navigationTitle("Dashboard")
-            .navigationBarTitleDisplayMode(.inline)
         }
-    }
 }
 
 #Preview {

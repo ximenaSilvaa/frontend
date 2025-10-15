@@ -8,7 +8,7 @@ import SwiftUI
 
 struct ScreenNotificationSettings: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var nsc = NotificationSettingsController()
+    @StateObject private var nsc = NotificationSettingsViewModel()
 
     var body: some View {
         ScrollView {

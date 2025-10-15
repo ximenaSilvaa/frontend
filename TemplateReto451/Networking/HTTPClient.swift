@@ -80,6 +80,8 @@ protocol HTTPClientProtocol {
     func updateUserProfile(name: String?, email: String?, username: String?, imagePath: String?) async throws -> UserResponse
     func uploadProfileImage(imageData: Data) async throws -> String
     func getUserPostInfo() async throws -> UserPostInfoDTO
+    func getDashboardInfo() async throws -> DashboardResponse
+    func getIdReport(id: Int) async throws -> [ReportDTO]
 }
 
 // MARK: - Supporting Types
@@ -347,7 +349,24 @@ struct HTTPClient: HTTPClientProtocol {
 
         return try await performRequest(request, expecting: [ReportDTO].self)
     }
+    
+    
+    func getIdReport(id: Int) async throws -> [ReportDTO] {
+        guard let url = URL(string: URLEndpoints.idReport(id: id)) else {
+            throw NetworkError.invalidURL
+        }
 
+        let request = try buildRequest(
+            url: url,
+            method: .get,
+            requiresAuth: true
+        )
+
+        Logger.log("Fetching report with id \(id)", level: .debug)
+
+        return try await performRequest(request, expecting: [ReportDTO].self)
+    }
+    
     func updateUserProfile(name: String?, email: String?, username: String?, imagePath: String? = nil) async throws -> UserResponse {
         guard let url = URL(string: URLEndpoints.users) else {
             throw NetworkError.invalidURL
@@ -421,8 +440,6 @@ struct HTTPClient: HTTPClientProtocol {
         return try await performRequest(request, expecting: UserPostInfoDTO.self)
     }
     
-    // MARK: - User Settings
-
     func getUserSettingsInfo() async throws -> SettingsResponseDTO {
         guard let url = URL(string: URLEndpoints.userSettingsInfo) else {
             throw NetworkError.invalidURL
@@ -452,6 +469,20 @@ struct HTTPClient: HTTPClientProtocol {
 
         Logger.log("Updating user settings info", level: .debug)
         _ = try await performRequest(request, expecting: EmptyResponse.self)
+    }
+    
+    func getDashboardInfo() async throws -> DashboardResponse {
+        guard let url = URL(string: URLEndpoints.dashboard) else {
+            throw NetworkError.invalidURL
+        }
+
+        let request = try buildRequest(
+            url: url,
+            method: .get,
+            requiresAuth: true
+        )
+
+        return try await performRequest(request, expecting: DashboardResponse.self)
     }
 
 

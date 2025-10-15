@@ -9,6 +9,6 @@ import Foundation
 import SwiftUI
 
 extension EnvironmentValues {
-    @Entry var authenticationController =  AuthenticationController(httpClient: HTTPClient())
+    @Entry var authenticationViewModel =  AuthenticationViewModel(httpClient: HTTPClient())
     
 }

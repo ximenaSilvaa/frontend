@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ScreenUserRegistration: View {
-    @Environment(\.authenticationController) var authenticationController
+    @Environment(\.authenticationViewModel) var authenticationViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var errors: [String] = []
     @State private var userForm = UserForm()
@@ -23,7 +23,7 @@ struct ScreenUserRegistration: View {
         errorMessage = nil
 
         do {
-            let response = try await authenticationController.registerUser(name: userForm.name, email: userForm.email, password: userForm.password)
+            let response = try await authenticationViewModel.registerUser(name: userForm.name, email: userForm.email, password: userForm.password)
             isLoading = false
             showSuccessAlert = true
         } catch {

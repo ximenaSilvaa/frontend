@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ReportDTO: Codable, Identifiable {
+struct ReportDTO: Codable, Identifiable,  Hashable {
     let id: Int
     let title: String
     let image: String
@@ -20,12 +20,12 @@ struct ReportDTO: Codable, Identifiable {
 
     
     var imageURL: String {
-        return "http://18.221.59.69/\(image)"
+        return "http://18.222.210.25/\(image)"
     }
 
  
     var userImageURL: String {
-        return "http://18.221.59.69/\(user_image)"
+        return "http://18.222.210.25/\(user_image)"
     }
 }
 
