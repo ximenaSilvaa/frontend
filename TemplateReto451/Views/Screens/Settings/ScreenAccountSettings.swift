@@ -9,53 +9,76 @@ import SwiftUI
 
 struct ScreenAccountSettings: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var anonymousReports: Bool = true
-
+    @StateObject private var vm = AccountSettingsViewModel()
     var body: some View {
         ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    // Header with back arrow
-                    HStack {
-                        Button(action: {
-                            dismiss()
-                        }) {
-                            Image(systemName: "chevron.left")
-                                .font(.title2)
-                                .foregroundColor(Color.brandPrimary)
-                        }
-                        .padding(.leading)
+            VStack(alignment: .leading, spacing: 24) {
 
-                        Spacer()
-
-                        Text("Privacidad")
-                            .font(.title)
-                            .bold()
-                            .foregroundColor(Color.brandPrimary)
-
-                        Spacer()
-
-                        // Invisible spacer to center the title
+                HStack {
+                    Button(action: {
+                        dismiss()
+                    }) {
                         Image(systemName: "chevron.left")
                             .font(.title2)
-                            .opacity(0)
-                            .padding(.trailing)
+                            .foregroundColor(Color.brandPrimary)
                     }
-
-                    VStack(alignment: .leading, spacing: 16) {
-                        privacyToggle(
-                            title: "Reportes anónimos",
-                            description: "Los reportes se crean con un nombre de usuario aleatorio.",
-                            isOn: $anonymousReports
-                        )
-                    }
-                    .padding(.horizontal)
+                    .padding(.leading)
 
                     Spacer()
+
+                    Text("Privacidad")
+                        .font(.title)
+                        .bold()
+                        .foregroundColor(Color.brandPrimary)
+
+                    Spacer()
+
+
+                    Image(systemName: "chevron.left")
+                        .font(.title2)
+                        .opacity(0)
+                        .padding(.trailing)
                 }
-                .padding(.vertical)
+
+                VStack(alignment: .leading, spacing: 16) {
+                    privacyToggle(
+                        title: "Reportes anónimos",
+                        description: "Los reportes se crean con un nombre de usuario aleatorio.",
+                        isOn: Binding(
+                            get: { vm.isAnonymousPreferred },
+                            set: {
+                                vm.isAnonymousPreferred = $0
+                                Task {
+                                    await vm.saveSettings()
+                                }
+                            }
+                        )
+                    )
+                }
+                .padding(.horizontal)
+
+                if vm.isLoading {
+                    ProgressView("Guardando cambios...")
+                        .frame(maxWidth: .infinity)
+                        .padding(.top)
+                }
+
+                if let error = vm.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                        .padding(.horizontal)
+                }
+
+                Spacer()
+            }
+            .padding(.vertical)
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarHidden(true)
+        .task {
+            await vm.loadSettings()
+        }
     }
 
     @ViewBuilder

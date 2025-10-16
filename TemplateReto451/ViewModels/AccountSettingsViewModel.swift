@@ -1,15 +1,15 @@
 //
-//  NotificationSettingsController.swift
-//  Reto
+//  AccountSettingsViewModel.swift
+//  TemplateReto451
 //
-//  Created by Ana Martinez on 16/09/25.
+//  Created by Ana Martinez on 15/10/25.
 //
 
 import Foundation
 
 @MainActor
-class NotificationSettingsViewModel: ObservableObject {
-    @Published var isReviewEnabled: Bool = true
+class AccountSettingsViewModel: ObservableObject {
+    @Published var isAnonymousPreferred: Bool = false
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
@@ -26,7 +26,7 @@ class NotificationSettingsViewModel: ObservableObject {
 
         do {
             let dto = try await service.getUserSettingsInfo()
-            isReviewEnabled = dto.reviewEnabledBool
+            isAnonymousPreferred = dto.anonymousReportsBool
             errorMessage = nil
         } catch {
             errorMessage = "Error load settings: \(error.localizedDescription)"
@@ -37,14 +37,13 @@ class NotificationSettingsViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
-
         do {
             let current = try await service.getUserSettingsInfo()
             let dto = SettingsRequestDTO(
                 isReactionsEnabled: current.reactionsEnabledBool,
-                isReviewEnabled: isReviewEnabled,
+                isReviewEnabled: current.reviewEnabledBool,
                 isReportsEnabled: current.reportsEnabledBool,
-                isAnonymousPreferred: current.anonymousReportsBool
+                isAnonymousPreferred: isAnonymousPreferred
             )
 
             try await service.updateUserSettingsInfo(dto)

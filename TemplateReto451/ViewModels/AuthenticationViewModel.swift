@@ -29,7 +29,6 @@ struct AuthenticationViewModel{
             _ = try await httpClient.getUserProfile()
             return true
         } catch {
-            // Token is invalid, clear stored tokens
             TokenStorage.shared.remove(identifier: "accessToken")
             TokenStorage.shared.remove(identifier: "refreshToken")
             return false

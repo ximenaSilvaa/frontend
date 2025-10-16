@@ -8,11 +8,12 @@ import SwiftUI
 
 struct ScreenNotificationSettings: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var nsc = NotificationSettingsViewModel()
+    @StateObject private var vm = NotificationSettingsViewModel()
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
+
                 HStack {
                     Button(action: {
                         dismiss()
@@ -32,80 +33,53 @@ struct ScreenNotificationSettings: View {
 
                     Spacer()
 
-                    
                     Image(systemName: "chevron.left")
                         .font(.title2)
                         .opacity(0)
                         .padding(.trailing)
                 }
-                
-                sectionToggle(
-                    icon: "bell",
-                    text: "Activar todas",
-                    isOn: Binding(
-                        get: { nsc.isActivated },
-                        set: { nsc.setActivated($0) }
-                    )
-                )
-                
-                Text("Comunidad")
-                    .font(.title2)
-                    .bold()
-                    .foregroundColor(Color.brandPrimary)
-                    .padding(.horizontal)
-                
-                sectionToggle(
-                    icon: "bell",
-                    text: "Notificarme reacciones",
-                    isOn: Binding(
-                        get: { nsc.isReactionsEnabled },
-                        set: {
-                            nsc.isReactionsEnabled = $0
-                            nsc.updateState()
-                        }
-                    )
-                )
-                
+
+
                 Text("Mis reportes")
                     .font(.title2)
                     .bold()
                     .foregroundColor(Color.brandPrimary)
                     .padding(.horizontal)
-                
+
                 sectionToggle(
                     icon: "bell",
                     text: "Notificarme procesos",
                     isOn: Binding(
-                        get: { nsc.isReviewEnabled },
+                        get: { vm.isReviewEnabled },
                         set: {
-                            nsc.isReviewEnabled = $0
-                            nsc.updateState()
+                            vm.isReviewEnabled = $0
+                            Task {
+                                await vm.saveSettings()
+                            }
                         }
                     )
                 )
-                
-                Text("Reportes recomendados")
-                    .font(.title2)
-                    .bold()
-                    .foregroundColor(Color.brandPrimary)
-                    .padding(.horizontal)
-                
-                sectionToggle(
-                    icon: "bell",
-                    text: "Notificarme reportes",
-                    isOn: Binding(
-                        get: { nsc.isReportsEnabled },
-                        set: {
-                            nsc.isReportsEnabled = $0
-                            nsc.updateState()
-                        }
-                    )
-                )
+
+                if vm.isLoading {
+                    ProgressView("Guardando cambios...")
+                        .padding(.top)
+                        .frame(maxWidth: .infinity)
+                }
+
+                if let error = vm.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                        .padding(.horizontal)
+                }
             }
             .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarHidden(true)
+        .task {
+            await vm.loadSettings()
+        }
     }
 
     @ViewBuilder
@@ -123,8 +97,6 @@ struct ScreenNotificationSettings: View {
     }
 }
 
-struct ScreenNotificationSettings_Previews: PreviewProvider {
-    static var previews: some View {
-        ScreenNotificationSettings()
-    }
+#Preview {
+    ScreenNotificationSettings()
 }

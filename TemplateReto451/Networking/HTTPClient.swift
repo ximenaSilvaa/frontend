@@ -82,6 +82,8 @@ protocol HTTPClientProtocol {
     func getUserPostInfo() async throws -> UserPostInfoDTO
     func getDashboardInfo() async throws -> DashboardResponse
     func getIdReport(id: Int) async throws -> [ReportDTO]
+    func getUserSettingsInfo() async throws -> SettingsResponseDTO
+    func updateUserSettingsInfo(_ settings: SettingsRequestDTO) async throws
 }
 
 // MARK: - Supporting Types
