@@ -535,6 +535,7 @@ struct HTTPClient: HTTPClientProtocol {
         return try await performRequest(request, expecting: [NotificationDTO].self)
     }
 
+
     // MARK: - Private Methods
     
     private func buildRequest(

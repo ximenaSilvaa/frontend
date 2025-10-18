@@ -7,8 +7,9 @@
 
 import Foundation
 
-struct NotificationDTO: Codable, Identifiable {
-    let id: Int?
+struct NotificationDTO: Decodable, Identifiable {
+    var id = UUID()
+    let created_by: Int
     let title: String
     let message: String
 }

@@ -49,7 +49,7 @@ struct NotificationRowComponent: View {
 }
 #Preview {
     let sampleNotification = NotificationDTO(
-        id: 1,
+        created_by: 1,
         title: "Reporte \"Phishing Banco\" aceptado.",
         message: "Tu reporte fue revisado y aprobado exitosamente."
     )

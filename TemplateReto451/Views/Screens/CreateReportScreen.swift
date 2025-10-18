@@ -17,6 +17,8 @@ struct CreateReportScreen: View {
     @State private var selectedCategory: Int? = nil
     @State private var categories: [CategoryDTO] = []
     @State private var isLoadingCategories: Bool = false
+    
+    @State private var isAnonymousPreferred: Bool = false
 
     private let httpClient = HTTPClient()
     
@@ -42,6 +44,7 @@ struct CreateReportScreen: View {
                         .foregroundColor(.black)
                 }
 
+                
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Adjuntar imagen")
                         .font(.title2)
@@ -117,12 +120,12 @@ struct CreateReportScreen: View {
                         .font(.title2)
                         .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
                     Divider()
-                    
+                                    
                     TextField("Descripción", text: $reportDescription)
                         .font(.body)
                         .cornerRadius(10)
                         .foregroundColor(.black)
-                }
+                 }
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("URL")
@@ -133,6 +136,23 @@ struct CreateReportScreen: View {
                         .font(.body)
                         .cornerRadius(10)
                         .foregroundColor(.black)
+                }
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Button(action: { isAnonymousPreferred.toggle() }) {
+                            Image(systemName: isAnonymousPreferred ? "checkmark.square.fill" : "square")
+                                .foregroundColor(isAnonymousPreferred ? Color.brandAccent : Color.gray)
+                                .font(.title2)
+                        }
+                        Text("Enviar reporte como anónimo")
+                            .font(.title2)
+                            .foregroundColor(Color.brandPrimary)
+                            .onTapGesture {
+                                isAnonymousPreferred.toggle()
+                            }
+                        Spacer()
+                    }
                 }
                 
                 Spacer()
@@ -157,10 +177,11 @@ struct CreateReportScreen: View {
         .onAppear {
             Task {
                 await loadCategories()
+                await loadUserSettings()
             }
         }
     }
-
+    
     private func loadCategories() async {
         isLoadingCategories = true
         do {
@@ -171,8 +192,18 @@ struct CreateReportScreen: View {
             isLoadingCategories = false
         }
     }
-}
 
+    private func loadUserSettings() async {
+        do {
+            let settings = try await httpClient.getUserSettingsInfo()
+            DispatchQueue.main.async {
+                self.isAnonymousPreferred = settings.anonymousReportsBool
+            }
+        } catch {
+            print("Error loading user settings: \(error)")
+        }
+    }
+}
 
 #Preview {
     CreateReportScreen()

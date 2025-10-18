@@ -14,14 +14,15 @@ class NotificationsViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
 
     private let service: HTTPClientProtocol
+
     init(service: HTTPClientProtocol = HTTPClient()) {
         self.service = service
     }
     
+    @MainActor
     func fetchNotifications() async {
         isLoading = true
         errorMessage = nil
-        defer { isLoading = false }
 
         do {
             let result = try await service.getNotifications()
@@ -30,5 +31,7 @@ class NotificationsViewModel: ObservableObject {
             errorMessage = "Error loading notifications"
             print("Error fetching notifications:", error)
         }
+        
+        isLoading = false
     }
 }
