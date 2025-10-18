@@ -21,37 +21,6 @@ struct NotificationsScreen: View {
                     .foregroundColor(.brandPrimary)
                     .padding(.top, 20)
 
-                // Filter Tabs
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        FilterTab(
-                            title: "Resumen",
-                            isSelected: selectedFilter == nil,
-                            action: { selectedFilter = nil }
-                        )
-
-                        FilterTab(
-                            title: "Mis reportes",
-                            isSelected: selectedFilter == .misReportes,
-                            action: { selectedFilter = .misReportes }
-                        )
-
-                        FilterTab(
-                            title: "Comunidad",
-                            isSelected: selectedFilter == .comunidad,
-                            action: { selectedFilter = .comunidad }
-                        )
-
-                        FilterTab(
-                            title: "Recomendados",
-                            isSelected: selectedFilter == .favoritos,
-                            action: { selectedFilter = .favoritos }
-                        )
-                    }
-                    .padding(.horizontal, 20)
-                }
-                .padding(.vertical, 20)
-
                 // Notifications List
                 ScrollView {
                     LazyVStack(spacing: 0) {

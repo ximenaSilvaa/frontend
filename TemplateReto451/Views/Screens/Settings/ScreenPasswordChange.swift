@@ -4,81 +4,149 @@
 //
 //  Created by Claude on 19/09/25.
 //
-
 import SwiftUI
 
 struct ScreenPasswordChange: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var currentPassword: String = ""
-    @State private var newPassword: String = ""
-    @State private var confirmPassword: String = ""
+    @StateObject private var vm = ChangePasswordViewModel()
+
     @State private var showCurrentPassword: Bool = false
     @State private var showNewPassword: Bool = false
     @State private var showConfirmPassword: Bool = false
 
     var body: some View {
         ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    // Header with back arrow
-                    HStack {
-                        Button(action: {
-                            dismiss()
-                        }) {
-                            Image(systemName: "chevron.left")
-                                .font(.title2)
-                                .foregroundColor(Color.brandPrimary)
-                        }
-                        .padding(.leading)
-
-                        Spacer()
-
-                        Text("Cambiar contraseña")
-                            .font(.title)
-                            .bold()
-                            .foregroundColor(Color.brandPrimary)
-
-                        Spacer()
-
-                        // Invisible spacer to center the title
+            VStack(alignment: .leading, spacing: 24) {
+                HStack {
+                    Button {
+                        dismiss()
+                    } label: {
                         Image(systemName: "chevron.left")
                             .font(.title2)
-                            .opacity(0)
-                            .padding(.trailing)
+                            .foregroundColor(Color.brandPrimary)
                     }
+                    .padding(.leading)
 
-                    Text("La contraseña debe tener al menos 10 caracteres e incluir una combinación de número, letras y caracteres especiales (!, @, #, $, %, &,).")
-                        .font(.body)
-                        .foregroundColor(.gray)
-                        .padding(.horizontal)
-                        .multilineTextAlignment(.leading)
+                    Spacer()
 
-                    VStack(spacing: 16) {
-                        passwordField(
-                            placeholder: "Contraseña actual",
-                            text: $currentPassword,
-                            isSecure: !showCurrentPassword,
-                            showPassword: $showCurrentPassword
-                        )
+                    Text("Cambiar contraseña")
+                        .font(.title)
+                        .bold()
+                        .foregroundColor(Color.brandPrimary)
 
-                        passwordField(
-                            placeholder: "Contraseña nueva",
-                            text: $newPassword,
-                            isSecure: !showNewPassword,
-                            showPassword: $showNewPassword
-                        )
+                    Spacer()
 
-                        passwordField(
-                            placeholder: "Repetir contraseña",
-                            text: $confirmPassword,
-                            isSecure: !showConfirmPassword,
-                            showPassword: $showConfirmPassword
-                        )
-                    }
+                    Image(systemName: "chevron.left")
+                        .font(.title2)
+                        .opacity(0)
+                        .padding(.trailing)
+                }
+
+                Text("La contraseña debe tener al menos 8 caracteres")
+                    .font(.body)
+                    .foregroundColor(.gray)
                     .padding(.horizontal)
+                    .multilineTextAlignment(.leading)
 
-                    Button(action: {
-                        // Handle password change
-                    }) {
+                VStack(spacing: 16) {
+                    passwordField(
+                        placeholder: "Contraseña actual",
+                        text: $vm.oldPassword,
+                        isSecure: !showCurrentPassword,
+                        showPassword: $showCurrentPassword
+                    )
+
+                    passwordField(
+                        placeholder: "Contraseña nueva",
+                        text: $vm.newPassword,
+                        isSecure: !showNewPassword,
+                        showPassword: $showNewPassword
+                    )
+
+                    passwordField(
+                        placeholder: "Repetir contraseña",
+                        text: $vm.confirmPassword,
+                        isSecure: !showConfirmPassword,
+                        showPassword: $showConfirmPassword
+                    )
+                }
+                .padding(.horizontal)
+
+
+                if !vm.validationErrors.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(vm.validationErrors, id: \.self) { error in
+                            HStack(spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(Color.brandAccent)
+                                    .font(.system(size: 14))
+
+                                Text(error)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(Color.brandAccent)
+                                    .multilineTextAlignment(.leading)
+
+                                Spacer()
+                            }
+                            .padding(12)
+                            .background(Color.brandAccent.opacity(0.1))
+                            .cornerRadius(8)
+                            .padding(.horizontal)
+                        }
+                    }
+                }
+
+                if let errorMessage = vm.errorMessage {
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(Color.brandAccent)
+                            .font(.system(size: 14))
+
+                        Text(errorMessage)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(Color.brandAccent)
+                            .multilineTextAlignment(.leading)
+
+                        Spacer()
+                    }
+                    .padding(12)
+                    .background(Color.brandAccent.opacity(0.1))
+                    .cornerRadius(8)
+                    .padding(.horizontal)
+                }
+
+                if let successMessage = vm.successMessage {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.seal.fill")
+                            .foregroundColor(Color.green)
+                            .font(.system(size: 14))
+
+                        Text(successMessage)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(Color.green)
+                            .multilineTextAlignment(.leading)
+
+                        Spacer()
+                    }
+                    .padding(12)
+                    .background(Color.green.opacity(0.15))
+                    .cornerRadius(8)
+                    .padding(.horizontal)
+                }
+
+                Button {
+                    Task {
+                        await vm.changePassword()
+                    }
+                } label: {
+                    if vm.isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color.brandAccent)
+                            .cornerRadius(25)
+                    } else {
                         Text("Cambiar contraseña")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.white)
@@ -86,14 +154,15 @@ struct ScreenPasswordChange: View {
                             .padding(.vertical, 16)
                             .background(Color.brandAccent)
                             .cornerRadius(25)
-                            .shadow(color: Color.brandAccent.opacity(0.3), radius: 8, x: 0, y: 4)
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 20)
-
-                    Spacer()
                 }
-                .padding(.vertical)
+                .disabled(vm.isLoading)
+                .padding(.horizontal)
+                .padding(.top, 20)
+
+                Spacer()
+            }
+            .padding(.vertical)
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarHidden(true)
@@ -110,9 +179,9 @@ struct ScreenPasswordChange: View {
                     .font(.system(size: 16))
             }
 
-            Button(action: {
+            Button {
                 showPassword.wrappedValue.toggle()
-            }) {
+            } label: {
                 Image(systemName: isSecure ? "eye.slash" : "eye")
                     .foregroundColor(.gray)
                     .font(.system(size: 16))
@@ -133,3 +202,4 @@ struct ScreenPasswordChange: View {
 #Preview {
     ScreenPasswordChange()
 }
+

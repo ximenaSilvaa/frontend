@@ -22,4 +22,5 @@ struct URLEndpoints {
     static let userPostInfo: String = String(server+"/users/post-info")
     static let userSettingsInfo: String = String(server+"/users/settings-info")
     static let dashboard: String = String(server+"/dashboard")
+    static let passwordReset: String = String(server+"/users/password")
 }

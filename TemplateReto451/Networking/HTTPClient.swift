@@ -84,6 +84,7 @@ protocol HTTPClientProtocol {
     func getIdReport(id: Int) async throws -> [ReportDTO]
     func getUserSettingsInfo() async throws -> SettingsResponseDTO
     func updateUserSettingsInfo(_ settings: SettingsRequestDTO) async throws
+    func passwordReset(_ dto: PasswordChangeDTO) async throws -> PasswordChangeResponse
 }
 
 // MARK: - Supporting Types
@@ -485,6 +486,22 @@ struct HTTPClient: HTTPClientProtocol {
         )
 
         return try await performRequest(request, expecting: DashboardResponse.self)
+    }
+
+    
+    func passwordReset(_ dto: PasswordChangeDTO) async throws -> PasswordChangeResponse {
+        guard let url = URL(string: URLEndpoints.passwordReset) else {
+            throw NetworkError.invalidURL
+        }
+
+        let request = try buildRequest(
+            url: url,
+            method: .post,
+            body: dto,
+            requiresAuth: true
+        )
+
+        return try await performRequest(request, expecting: PasswordChangeResponse.self)
     }
 
 
