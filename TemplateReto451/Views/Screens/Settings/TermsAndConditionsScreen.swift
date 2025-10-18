@@ -9,97 +9,102 @@ import SwiftUI
 
 struct TermsAndConditionsScreen: View {
     @Environment(\.dismiss) private var dismiss
+    
+    @State private var title: String = ""
+    @State private var text: String = ""
+    @State private var isLoading = true
+    @State private var errorMessage: String? = nil
+
+    private let service: HTTPClientProtocol = HTTPClient()
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    // Header
-                    HStack {
-                        Button(action: {
-                            dismiss()
-                        }) {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundColor(.black)
+            ZStack {
+                Color.white.ignoresSafeArea()
+
+                if isLoading {
+                    ProgressView("Cargando...")
+                } else if let error = errorMessage {
+                    VStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.red)
+                            .font(.system(size: 30))
+                        Text(error)
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        Button("Reintentar") {
+                            Task { await fetchTerms() }
                         }
-
-                        Spacer()
-
-                        Text("Términos y Condiciones")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.black)
-
-                        Spacer()
-
-                        // Invisible spacer for balance
-                        Image(systemName: "xmark")
-                            .font(.system(size: 18, weight: .medium))
-                            .opacity(0)
+                        .padding(.top, 8)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 10)
+                } else {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 20) {
+                            HStack {
+                                Button(action: { dismiss() }) {
+                                    Image(systemName: "xmark")
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundColor(.black)
+                                }
+                                Spacer()
+                                Text(title.isEmpty ? "Red por la Ciberseguridad - Términos y Condiciones" : title)
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.black)
+                                Spacer()
+                                Image(systemName: "xmark")
+                                    .font(.system(size: 18, weight: .medium))
+                                    .opacity(0)
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.top, 10)
 
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Red por la Ciberseguridad - Términos y Condiciones")
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(.black)
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text(title)
+                                    .font(.system(size: 22, weight: .bold))
+                                    .foregroundColor(.black)
+                                Text(text)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.black)
+                                    .lineSpacing(4)
+                            }
+                            .padding(.horizontal, 20)
 
-                        Text("Última actualización: 17 de septiembre de 2025")
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
-
-                        Group {
-                            sectionView(title: "1. Aceptación de los Términos", content: """
-                            Al acceder y utilizar la aplicación Red por la Ciberseguridad, usted acepta estar sujeto a estos términos y condiciones. Si no está de acuerdo con alguna parte de estos términos, no debe utilizar nuestra aplicación.
-                            """)
-
-                            sectionView(title: "2. Uso de la Aplicación", content: """
-                            Esta aplicación está diseñada para proporcionar información y herramientas relacionadas con la ciberseguridad. El usuario se compromete a:
-                            • Utilizar la aplicación de manera responsable y ética
-                            • No intentar comprometer la seguridad de la aplicación
-                            • Proporcionar información veraz y actualizada
-                            • Mantener la confidencialidad de sus credenciales de acceso
-                            """)
-
-                            sectionView(title: "3. Privacidad y Protección de Datos", content: """
-                            Nos comprometemos a proteger su privacidad y datos personales de acuerdo con las leyes aplicables de protección de datos. La información recopilada se utiliza únicamente para los fines establecidos en nuestra política de privacidad.
-                            """)
-
-                            sectionView(title: "4. Responsabilidades del Usuario", content: """
-                            El usuario es responsable de:
-                            • Mantener la seguridad de su cuenta
-                            • Utilizar contraseñas seguras
-                            • Reportar cualquier actividad sospechosa
-                            • Cumplir con las leyes locales aplicables
-                            """)
-
+                            Spacer(minLength: 40)
                         }
                     }
-                    .padding(.horizontal, 20)
-
-                    // Bottom spacing
-                    Spacer(minLength: 40)
                 }
             }
-            .background(Color.white)
+        }
+        .task {
+            await fetchTerms()
         }
         .navigationBarHidden(true)
     }
 
-    private func sectionView(title: String, content: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.black)
-
-            Text(content)
-                .font(.system(size: 14))
-                .foregroundColor(.black)
-                .lineSpacing(4)
+    private func fetchTerms() async {
+        isLoading = true
+        errorMessage = nil
+        
+        guard let url = URL(string: URLEndpoints.termsAndConditions) else {
+            errorMessage = "URL inválid."
+            isLoading = false
+            return
         }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let terms = try JSONDecoder().decode(TermsAndConditionsDTO.self, from: data)
+            title = terms.title
+            text = terms.text
+        } catch {
+            print("Error: \(error)")
+            errorMessage = "Error loading terms and conditions."
+        }
+        isLoading = false
     }
 }
+
 
 #Preview {
     TermsAndConditionsScreen()

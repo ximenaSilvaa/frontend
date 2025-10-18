@@ -41,28 +41,25 @@ class ChangePasswordViewModel: ObservableObject {
         errorMessage = nil
         successMessage = nil
         
-        // Primero validar localmente (sin validar oldPassword aquí)
         guard validate() else { return }
         
         isLoading = true
         defer { isLoading = false }
         
         do {
-            let dto = PasswordChangeDTO(oldPassword: oldPassword, newPassword: newPassword)
-            let response = try await service.passwordReset(dto)
+            _ = try await service.passwordReset(PasswordChangeDTO(oldPassword: oldPassword, newPassword: newPassword))
             
-            // Asumimos que si no hay error, es éxito
             successMessage = "Contraseña cambiada correctamente"
             validationErrors = []
             
         } catch let error as NetworkError {
-            // Manejo específico para contraseña actual incorrecta
             switch error {
-            case .serverError(let statusCode, let message):
-                if let message = message, message.contains("contraseña actual") || message.contains("old password") {
+            case .serverError(_, let message):
+                if let message = message,
+                   message.localizedCaseInsensitiveContains("contraseña actual") ||
+                   message.localizedCaseInsensitiveContains("old password") {
                     errorMessage = "La contraseña actual es incorrecta"
                 } else {
-                    // No mostramos otros errores del servidor
                     errorMessage = nil
                 }
             default:
@@ -70,7 +67,6 @@ class ChangePasswordViewModel: ObservableObject {
             }
             
         } catch {
-            // Otros errores genéricos
             errorMessage = nil
         }
     }

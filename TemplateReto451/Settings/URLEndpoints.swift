@@ -23,4 +23,5 @@ struct URLEndpoints {
     static let userSettingsInfo: String = String(server+"/users/settings-info")
     static let dashboard: String = String(server+"/dashboard")
     static let passwordReset: String = String(server+"/users/password")
+    static let termsAndConditions: String = String(server+"/configurations/1")
 }
