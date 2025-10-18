@@ -7,51 +7,62 @@
 
 import SwiftUI
 
+
 struct NotificationsScreen: View {
-    @StateObject private var notificationData = NotificationData()
-    @State private var selectedFilter: NotificationType? = nil
-    @State private var selectedNotification: NotificationItem? = nil
+    @StateObject private var vm = NotificationsViewModel()
+    @State private var selectedNotification: NotificationDTO? = nil
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // Title
-                Text("Notificaciones")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.brandPrimary)
-                    .padding(.top, 20)
+            ZStack {
+                Color.gray.opacity(0.05)
+                    .ignoresSafeArea()
 
-                // Notifications List
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        if selectedFilter == nil {
-                            // Show grouped notifications (Resumen)
-                            let groupedNotifications = notificationData.getGroupedNotifications()
-                            ForEach(Array(groupedNotifications.enumerated()), id: \.offset) { index, group in
-                                NotificationGroupSection(
-                                    title: group.0,
-                                    notifications: group.1,
-                                    onNotificationTap: { notification in
+                VStack(spacing: 0) {
+                    Text("Notificaciones")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.brandPrimary)
+                        .padding(.top, 20)
+
+                    if vm.isLoading {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
+                    } else if vm.notifications.isEmpty {
+                        
+                        Spacer()
+
+                        VStack(spacing: 12) {
+                            Image(systemName: "bell.slash")
+                                .font(.system(size: 70))
+                                .foregroundColor(.gray.opacity(0.5))
+
+                            Text("No tienes notificaciones aún")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                                .multilineTextAlignment(.center)
+                        }
+
+                        Spacer()
+                    } else {ScrollView {
+                            LazyVStack(spacing: 12) {
+                                ForEach(vm.notifications, id: \.id) { notification in
+                                    NotificationRowComponent(notification: notification) {
                                         selectedNotification = notification
                                     }
-                                )
-                            }
-                        } else {
-                            // Show filtered notifications
-                            let filteredNotifications = notificationData.getFilteredNotifications(for: selectedFilter)
-                            ForEach(filteredNotifications) { notification in
-                                NotificationRowComponent(notification: notification) {
-                                    selectedNotification = notification
+                                    .padding(.horizontal, 16)
                                 }
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 4)
                             }
+                            .padding(.top, 10)
+                            .padding(.bottom, 40)
                         }
                     }
-                    .padding(.bottom, 20) // Space for TabView navbar
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .background(Color.gray.opacity(0.05))
+            .task {
+                await vm.fetchNotifications()
+            }
         }
         .navigationBarHidden(true)
         .sheet(item: $selectedNotification) { notification in
@@ -61,31 +72,6 @@ struct NotificationsScreen: View {
 }
 
 
-struct NotificationGroupSection: View {
-    let title: String
-    let notifications: [NotificationItem]
-    let onNotificationTap: (NotificationItem) -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(title)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.brandPrimary)
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-
-            ForEach(notifications) { notification in
-                NotificationRowComponent(notification: notification) {
-                    onNotificationTap(notification)
-                }
-                .padding(.horizontal, 20)
-            }
-        }
-        .padding(.vertical, 12)
-    }
-}
 
 #Preview {
     NotificationsScreen()

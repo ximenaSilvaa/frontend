@@ -86,6 +86,7 @@ protocol HTTPClientProtocol {
     func updateUserSettingsInfo(_ settings: SettingsRequestDTO) async throws
     func passwordReset(_ dto: PasswordChangeDTO) async throws -> PasswordChangeResponse
     func getTermsAndConditions() async throws -> TermsAndConditionsDTO
+    func getNotifications() async throws -> [NotificationDTO]
 }
 
 // MARK: - Supporting Types
@@ -519,6 +520,20 @@ struct HTTPClient: HTTPClientProtocol {
         return try await performRequest(request, expecting: TermsAndConditionsDTO.self)
     }
 
+    func getNotifications() async throws -> [NotificationDTO] {
+        guard let url = URL(string: URLEndpoints.notifications) else {
+            throw NetworkError.invalidURL
+        }
+
+        let request = try buildRequest(
+            url: url,
+            method: .get,
+            requiresAuth: true
+        )
+
+        Logger.log("Fetching notifications", level: .debug)
+        return try await performRequest(request, expecting: [NotificationDTO].self)
+    }
 
     // MARK: - Private Methods
     

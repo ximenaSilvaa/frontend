@@ -6,41 +6,33 @@
 //
 
 import SwiftUI
-
 struct NotificationRowComponent: View {
-    let notification: NotificationItem
+    let notification: NotificationDTO
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 12) {
-                // Icon
-                Image(systemName: notification.iconName)
+                // Icono genérico (puedes personalizar más adelante según título o mensaje)
+                Image(systemName: "bell.fill")
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(notification.iconColor)
+                    .foregroundColor(.blue)
                     .frame(width: 24, height: 24)
 
-                // Content
+                // Contenido
                 VStack(alignment: .leading, spacing: 4) {
                     Text(notification.title)
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.brandPrimary)
                         .multilineTextAlignment(.leading)
 
-                    if let description = notification.description {
-                        Text(description)
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
-                            .multilineTextAlignment(.leading)
-                    }
+                    Text(notification.message)
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.leading)
                 }
 
                 Spacer()
-
-                // Time
-                Text(notification.timeAgo)
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -55,20 +47,14 @@ struct NotificationRowComponent: View {
         .buttonStyle(PlainButtonStyle())
     }
 }
-
 #Preview {
-    let sampleNotification = NotificationItem(
-        type: .misReportes,
-        status: .accepted,
+    let sampleNotification = NotificationDTO(
+        id: 1,
         title: "Reporte \"Phishing Banco\" aceptado.",
-        description: nil,
-        timeAgo: "1 d",
-        iconName: "checkmark.square",
-        iconColor: .blue,
-        date: Date()
+        message: "Tu reporte fue revisado y aprobado exitosamente."
     )
 
-    return NotificationRowComponent(notification: sampleNotification) {
+    NotificationRowComponent(notification: sampleNotification) {
         print("Tapped notification")
     }
     .padding()
