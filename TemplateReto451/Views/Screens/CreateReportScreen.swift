@@ -4,28 +4,16 @@
 //
 //  Created by Ana Martinez on 19/09/25.
 //
-
 import SwiftUI
 import PhotosUI
 
 struct CreateReportScreen: View {
-    @State private var reportTitle: String = ""
-    @State private var reportDescription: String = ""
-    @State private var reportURL: String = ""
+    @StateObject private var viewModel = CreateReportViewModel()
 
-    @State private var reportImage: Data? = nil
-    @State private var selectedCategory: Int? = nil
-    @State private var categories: [CategoryDTO] = []
-    @State private var isLoadingCategories: Bool = false
-    
-    @State private var isAnonymousPreferred: Bool = false
-
-    private let httpClient = HTTPClient()
-    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                
+
                 Text("Crear reporte")
                     .font(.largeTitle)
                     .bold()
@@ -38,13 +26,12 @@ struct CreateReportScreen: View {
                         .font(.title2)
                         .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
                     Divider()
-                    TextField("Ej. Estafa de compra", text: $reportTitle)
+                    TextField("Ej. Estafa de compra", text: $viewModel.title)
                         .font(.body)
                         .cornerRadius(10)
                         .foregroundColor(.black)
                 }
 
-                
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Adjuntar imagen")
                         .font(.title2)
@@ -53,15 +40,14 @@ struct CreateReportScreen: View {
                     
                     HStack {
                         Spacer()
-                        
                         PhotosPicker(
                             selection: Binding(
                                 get: { nil },
                                 set: { newItem in
                                     guard let item = newItem else { return }
-                                    Task {
+                                    Task { @MainActor in
                                         if let data = try? await item.loadTransferable(type: Data.self) {
-                                            reportImage = data
+                                            viewModel.imageData = data
                                         }
                                     }
                                 }
@@ -69,7 +55,9 @@ struct CreateReportScreen: View {
                             matching: .images,
                             photoLibrary: .shared()
                         ) {
-                            if let data = reportImage, let uiImage = UIImage(data: data) {
+                            if let uiImage = MainActor.assumeIsolated({
+                                viewModel.imageData.flatMap { UIImage(data: $0) }
+                            }) {
                                 Image(uiImage: uiImage)
                                     .resizable()
                                     .scaledToFit()
@@ -83,29 +71,30 @@ struct CreateReportScreen: View {
                                     .foregroundColor(.gray)
                             }
                         }
-                        
                         Spacer()
                     }
                 }
 
+    
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Categoría(s)")
                         .font(.title2)
                         .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
                     Divider()
-
-                    if isLoadingCategories {
+                    
+                    if viewModel.isLoading {
                         ProgressView("Cargando categorías...")
                             .padding()
                     } else {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 12) {
-                                ForEach(categories) { category in
+                                ForEach(viewModel.categories) { category in
                                     FilterTab(
                                         title: category.name,
-                                        isSelected: selectedCategory == category.id,
+                                        isSelected: viewModel.selectedCategoryId == category.id,
                                         action: {
-                                            selectedCategory = selectedCategory == category.id ? nil : category.id
+                                            viewModel.selectedCategoryId =
+                                                viewModel.selectedCategoryId == category.id ? nil : category.id
                                         }
                                     )
                                 }
@@ -116,49 +105,53 @@ struct CreateReportScreen: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Información")
+                    Text("Información. Descripción")
                         .font(.title2)
                         .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
                     Divider()
-                                    
-                    TextField("Descripción", text: $reportDescription)
+                    
+                    TextEditor(text: $viewModel.description)
+                        .frame(height: 100)
+                        .overlay(RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.5)))
+                }
+
+  
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("URL (opcional)")
+                        .font(.title2)
+                        .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
+                    Divider()
+                    TextField("Ej. https://pagina_estafa.com", text: $viewModel.reportURL)
                         .font(.body)
                         .cornerRadius(10)
                         .foregroundColor(.black)
-                 }
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("URL")
-                        .font(.title2)
-                        .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
-                    Divider()
-                    TextField("Ej. https://pagina_estafa.com", text: $reportURL)
-                        .font(.body)
-                        .cornerRadius(10)
-                        .foregroundColor(.black)
-                }
-                
-                VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Button(action: { isAnonymousPreferred.toggle() }) {
-                            Image(systemName: isAnonymousPreferred ? "checkmark.square.fill" : "square")
-                                .foregroundColor(isAnonymousPreferred ? Color.brandAccent : Color.gray)
+                        Button(action: { viewModel.isAnonymousPreferred.toggle() }) {
+                            Image(systemName: viewModel.isAnonymousPreferred ? "checkmark.square.fill" : "square")
+                                .foregroundColor(viewModel.isAnonymousPreferred ? Color.brandAccent : Color.gray)
                                 .font(.title2)
                         }
                         Text("Enviar reporte como anónimo")
                             .font(.title2)
                             .foregroundColor(Color.brandPrimary)
                             .onTapGesture {
-                                isAnonymousPreferred.toggle()
+                                viewModel.isAnonymousPreferred.toggle()
                             }
                         Spacer()
                     }
                 }
-                
-                Spacer()
-                
+
+        
                 Button(action: {
-                    // put bd
+                    Task {
+                        await viewModel.createReport()
+                    }
                 }) {
                     Text("Crear reporte")
                         .fontWeight(.semibold)
@@ -174,38 +167,28 @@ struct CreateReportScreen: View {
             .padding(.horizontal)
             .padding(.bottom)
         }
-        .onAppear {
-            Task {
-                await loadCategories()
-                await loadUserSettings()
+        .disabled(viewModel.isLoading)
+        .overlay {
+            if viewModel.isLoading {
+                ZStack {
+                    Color.black.opacity(0.3).ignoresSafeArea()
+                    ProgressView("Creando reporte...")
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                }
             }
         }
-    }
-    
-    private func loadCategories() async {
-        isLoadingCategories = true
-        do {
-            categories = try await httpClient.getCategories()
-            isLoadingCategories = false
-        } catch {
-            print("Error loading categories: \(error)")
-            isLoadingCategories = false
+        .alert(viewModel.alertMessage ?? "", isPresented: $viewModel.showAlert) {
+            Button("OK") { viewModel.showAlert = false }
         }
-    }
-
-    private func loadUserSettings() async {
-        do {
-            let settings = try await httpClient.getUserSettingsInfo()
-            DispatchQueue.main.async {
-                self.isAnonymousPreferred = settings.anonymousReportsBool
-            }
-        } catch {
-            print("Error loading user settings: \(error)")
+        .task {
+            await viewModel.loadInitialData()
         }
     }
 }
+
 
 #Preview {
     CreateReportScreen()
 }
-

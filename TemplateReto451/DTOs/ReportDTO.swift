@@ -43,3 +43,23 @@ extension ReportDTO {
         categories: [1, 5]
     )
 }
+
+struct CreateReportRequestDTO: Encodable {
+    let title: String
+    let description: String
+    let status_id: Int
+    let category: [Int]
+    let report_url: String?
+    let image: String?
+    let is_anonymous: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case title
+        case description
+        case status_id
+        case category
+        case report_url
+        case image
+        case is_anonymous
+    }
+}

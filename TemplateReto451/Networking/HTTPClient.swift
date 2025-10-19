@@ -87,6 +87,7 @@ protocol HTTPClientProtocol {
     func passwordReset(_ dto: PasswordChangeDTO) async throws -> PasswordChangeResponse
     func getTermsAndConditions() async throws -> TermsAndConditionsDTO
     func getNotifications() async throws -> [NotificationDTO]
+    func createReport(_ report: CreateReportRequestDTO) async throws
 }
 
 // MARK: - Supporting Types
@@ -535,7 +536,23 @@ struct HTTPClient: HTTPClientProtocol {
         return try await performRequest(request, expecting: [NotificationDTO].self)
     }
 
+    func createReport(_ report: CreateReportRequestDTO) async throws {
+        guard let url = URL(string: URLEndpoints.createReport) else {
+            throw NetworkError.invalidURL
+        }
+        
+        let request = try buildRequest(
+            url: url,
+            method: .post,
+            body: report,
+            requiresAuth: true
+        )
 
+        Logger.log("Creating new report", level: .debug)
+        _ = try await performRequest(request, expecting: EmptyResponse.self)
+    }
+
+     
     // MARK: - Private Methods
     
     private func buildRequest(
@@ -630,4 +647,6 @@ class TokenStorage: TokenStorageProtocol {
     func remove(identifier: String) {
         UserDefaults.standard.removeObject(forKey: identifier)
     }
+    
+    
 }
