@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import SwiftUI
 
 @MainActor
 final class CreateReportViewModel: ObservableObject {
+    
     @Published var title: String = ""
     @Published var description: String = ""
     @Published var reportURL: String = ""
@@ -21,8 +23,10 @@ final class CreateReportViewModel: ObservableObject {
     @Published var alertMessage: String?
     @Published var showAlert: Bool = false
     
+    
     private let httpClient = HTTPClient()
     private var currentUserId: Int? = nil
+    
     
     func loadInitialData() async {
         isLoading = true
@@ -39,6 +43,7 @@ final class CreateReportViewModel: ObservableObject {
             isAnonymousPreferred = settingsResult.anonymousReportsBool
             currentUserId = userResult.id
             
+            
         } catch {
             handleError(error)
         }
@@ -51,43 +56,45 @@ final class CreateReportViewModel: ObservableObject {
             return
         }
 
-        let safeReportURL = reportURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            ? "https://no-url-provided.com"
-            : reportURL.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        let safeImagePath = imageData != nil
-            ? "profile-pictures/dummy.jpg"
-            : "profile-pictures/default.jpg"
-
-        let dto = CreateReportRequestDTO(
-            title: title.trimmingCharacters(in: .whitespacesAndNewlines),
-            description: description.trimmingCharacters(in: .whitespacesAndNewlines),
-            status_id: 1,
-            category: selectedCategoryId != nil ? [selectedCategoryId!] : [],
-            report_url: safeReportURL,
-            image: safeImagePath,
-            is_anonymous: isAnonymousPreferred ? 1 : 0
-        )
-
         isLoading = true
         defer { isLoading = false }
 
         do {
+            let safeReportURL = reportURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                ? "https://no-url-provided.com"
+                : reportURL.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            var uploadedImagePath: String = "profile-pictures/default.jpg"
+            if let imageData = imageData {
+                uploadedImagePath = try await httpClient.uploadReportImage(imageData: imageData)
+            }
+
+            let dto = CreateReportRequestDTO(
+                title: title.trimmingCharacters(in: .whitespacesAndNewlines),
+                description: description.trimmingCharacters(in: .whitespacesAndNewlines),
+                status_id: 1,
+                category: [selectedCategoryId ?? 0],
+                report_url: safeReportURL,
+                image: uploadedImagePath,
+                is_anonymous: isAnonymousPreferred ? 1 : 0
+            )
+            
             try await httpClient.createReport(dto)
+
             showAlert(message: "Reporte creado exitosamente")
             resetForm()
+
         } catch {
             handleError(error)
         }
     }
-
     
     private func validateInputs() -> Bool {
-        if title.isEmpty {
+        if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             showAlert(message: "El título no puede estar vacío.")
             return false
         }
-        if description.isEmpty {
+        if description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             showAlert(message: "La descripción no puede estar vacía.")
             return false
         }
@@ -95,13 +102,18 @@ final class CreateReportViewModel: ObservableObject {
             showAlert(message: "Debes seleccionar una categoría.")
             return false
         }
+       
         if !reportURL.isEmpty {
-            let pattern = #"^(https?:\/\/)([\w\-]+(\.[\w\-]+)+)(:\d+)?(\/\S*)?$"#
-                   if reportURL.range(of: pattern, options: .regularExpression) == nil {
-                       showAlert(message: "La URL no es válida. Ejemplo: https://pagina.com")
-                       return false
-                   }
+            let pattern = #"^(https?:\/\/)([A-Za-z0-9]+(?:-[A-Za-z0-9]+)*\.)+[A-Za-z]{2,}(\/\S*)?$"#
+            if reportURL.range(of: pattern, options: .regularExpression) == nil {
+                showAlert(message: "La URL no es válida. Ejemplo: https://pagina.com")
+                return false
+            }
         }
+
+
+        
+        
         return true
     }
     
@@ -126,5 +138,46 @@ final class CreateReportViewModel: ObservableObject {
         } else {
             showAlert(message: "Error inesperado: \(error.localizedDescription)")
         }
+        Logger.log("Error en CreateReportViewModel: \(error)", level: .error)
     }
+    
+    func processImageData(_ data: Data) {
+            guard let uiImage = UIImage(data: data) else {
+                print("Error al crear UIImage desde data")
+                return
+            }
+
+            let resizedImage = resizeImage(image: uiImage, maxDimension: 1024)
+            let compressedData = resizedImage.jpegData(compressionQuality: 0.7)
+
+            if let compressedData = compressedData, compressedData.count < 1048576 {
+                DispatchQueue.main.async {
+                    self.imageData = compressedData
+                }
+            } else {
+    
+                let moreCompressedData = resizedImage.jpegData(compressionQuality: 0.5)
+                DispatchQueue.main.async {
+                    self.imageData = moreCompressedData
+                }
+            }
+        }
+
+        private func resizeImage(image: UIImage, maxDimension: CGFloat) -> UIImage {
+            let size = image.size
+            let aspectRatio = size.width / size.height
+            var newSize: CGSize
+
+            if size.width > size.height {
+                newSize = CGSize(width: maxDimension, height: maxDimension / aspectRatio)
+            } else {
+                newSize = CGSize(width: maxDimension * aspectRatio, height: maxDimension)
+            }
+
+            UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+            image.draw(in: CGRect(origin: .zero, size: newSize))
+            let newImage = UIGraphicsGetImageFromCurrentImageContext() ?? image
+            UIGraphicsEndImageContext()
+            return newImage
+        }
 }

@@ -63,3 +63,4 @@ struct CreateReportRequestDTO: Encodable {
         case is_anonymous
     }
 }
+

@@ -88,6 +88,9 @@ protocol HTTPClientProtocol {
     func getTermsAndConditions() async throws -> TermsAndConditionsDTO
     func getNotifications() async throws -> [NotificationDTO]
     func createReport(_ report: CreateReportRequestDTO) async throws
+    func uploadReportImage(imageData: Data) async throws -> String
+    func deleteImage(path: String) async throws
+
 }
 
 // MARK: - Supporting Types
@@ -457,7 +460,6 @@ struct HTTPClient: HTTPClientProtocol {
             requiresAuth: true
         )
 
-        Logger.log("Fetching user settings info", level: .debug)
         return try await performRequest(request, expecting: SettingsResponseDTO.self)
     }
 
@@ -473,7 +475,6 @@ struct HTTPClient: HTTPClientProtocol {
             requiresAuth: true
         )
 
-        Logger.log("Updating user settings info", level: .debug)
         _ = try await performRequest(request, expecting: EmptyResponse.self)
     }
     
@@ -532,7 +533,6 @@ struct HTTPClient: HTTPClientProtocol {
             requiresAuth: true
         )
 
-        Logger.log("Fetching notifications", level: .debug)
         return try await performRequest(request, expecting: [NotificationDTO].self)
     }
 
@@ -548,11 +548,54 @@ struct HTTPClient: HTTPClientProtocol {
             requiresAuth: true
         )
 
-        Logger.log("Creating new report", level: .debug)
         _ = try await performRequest(request, expecting: EmptyResponse.self)
     }
 
-     
+    func uploadReportImage(imageData: Data) async throws -> String {
+        guard let url = URL(string: URLEndpoints.uploadReportImage()) else {
+            throw NetworkError.invalidURL
+        }
+
+        let token = try requireAuthToken()
+        let boundary = UUID().uuidString
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        var body = Data()
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"report.jpg\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+        body.append(imageData)
+        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        request.httpBody = body
+
+        let response = try await performRequest(request, expecting: ImageUploadResponse.self)
+
+        return response.path
+    }
+
+    func deleteImage(path: String) async throws {
+        guard let url = URL(string: URLEndpoints.deleteImage()) else {
+            throw NetworkError.invalidURL
+        }
+
+        let token = try requireAuthToken()
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let body = ["path": path]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+
+        _ = try await performRequest(request, expecting: EmptyResponse.self)
+
+    }
+
     // MARK: - Private Methods
     
     private func buildRequest(

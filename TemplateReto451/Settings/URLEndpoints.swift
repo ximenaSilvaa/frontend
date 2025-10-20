@@ -26,4 +26,7 @@ struct URLEndpoints {
     static let termsAndConditions: String = String(server+"/configurations/1")
     static let notifications: String = String(server+"/notifications")
     static let createReport: String = String(server+"/users/report")
+    static func uploadReportImage() -> String { "\(server)/images/report-pictures" }
+    static func deleteImage() -> String { "\(server)/images" }
+
 }

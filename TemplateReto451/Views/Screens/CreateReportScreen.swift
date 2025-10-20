@@ -32,26 +32,26 @@ struct CreateReportScreen: View {
                         .foregroundColor(.black)
                 }
 
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 16) {
                     Text("Adjuntar imagen")
                         .font(.title2)
                         .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
                     Divider()
-                    
+
                     HStack {
                         Spacer()
                         PhotosPicker(
                             selection: Binding(
-                                get: { nil },
-                                set: { newItem in
-                                    guard let item = newItem else { return }
-                                    Task { @MainActor in
-                                        if let data = try? await item.loadTransferable(type: Data.self) {
-                                            viewModel.imageData = data
+                                    get: { nil },
+                                    set: { newItem in
+                                        guard let item = newItem else { return }
+                                        Task {
+                                            if let data = try? await item.loadTransferable(type: Data.self) {
+                                                viewModel.processImageData(data)
+                                            }
                                         }
                                     }
-                                }
-                            ),
+                                ),
                             matching: .images,
                             photoLibrary: .shared()
                         ) {
@@ -61,27 +61,31 @@ struct CreateReportScreen: View {
                                 Image(uiImage: uiImage)
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(height: 150)
+                                    .frame(height: 200)
                                     .cornerRadius(10)
                             } else {
-                                Image(systemName: "photo")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 150)
-                                    .foregroundColor(.gray)
+                                VStack {
+                                    Image(systemName: "photo")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 200)
+                                        .foregroundColor(.gray)
+                                    
+                                }
+                                .frame(height: 200)
                             }
                         }
                         Spacer()
                     }
                 }
 
-    
+                
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Categoría(s)")
                         .font(.title2)
                         .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
                     Divider()
-                    
+
                     if viewModel.isLoading {
                         ProgressView("Cargando categorías...")
                             .padding()
@@ -109,14 +113,13 @@ struct CreateReportScreen: View {
                         .font(.title2)
                         .foregroundColor(Color(red: 4/255, green: 9/255, blue: 69/255))
                     Divider()
-                    
+
                     TextEditor(text: $viewModel.description)
                         .frame(height: 100)
                         .overlay(RoundedRectangle(cornerRadius: 8)
                             .stroke(Color.gray.opacity(0.5)))
                 }
 
-  
                 VStack(alignment: .leading, spacing: 8) {
                     Text("URL (opcional)")
                         .font(.title2)
@@ -131,23 +134,23 @@ struct CreateReportScreen: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Button(action: { viewModel.isAnonymousPreferred.toggle() }) {
-                            Image(systemName: viewModel.isAnonymousPreferred ? "checkmark.square.fill" : "square")
-                                .foregroundColor(viewModel.isAnonymousPreferred ? Color.brandAccent : Color.gray)
-                                .font(.title2)
-                        }
-                        Text("Enviar reporte como anónimo")
-                            .font(.title2)
-                            .foregroundColor(Color.brandPrimary)
-                            .onTapGesture {
-                                viewModel.isAnonymousPreferred.toggle()
-                            }
-                        Spacer()
-                    }
-                }
+                             HStack {
+                                 Button(action: { viewModel.isAnonymousPreferred.toggle() }) {
+                                     Image(systemName: viewModel.isAnonymousPreferred ? "checkmark.square.fill" : "square")
+                                         .foregroundColor(viewModel.isAnonymousPreferred ? Color.brandAccent : Color.gray)
+                                         .font(.title2)
+                                 }
+                                 Text("Enviar reporte como anónimo")
+                                     .font(.title2)
+                                     .foregroundColor(Color.brandPrimary)
+                                     .onTapGesture {
+                                         viewModel.isAnonymousPreferred.toggle()
+                                     }
+                                 Spacer()
+                             }
+                         }
 
-        
+
                 Button(action: {
                     Task {
                         await viewModel.createReport()
@@ -167,6 +170,7 @@ struct CreateReportScreen: View {
             .padding(.horizontal)
             .padding(.bottom)
         }
+
         .disabled(viewModel.isLoading)
         .overlay {
             if viewModel.isLoading {
@@ -187,7 +191,6 @@ struct CreateReportScreen: View {
         }
     }
 }
-
 
 #Preview {
     CreateReportScreen()
