@@ -13,18 +13,18 @@ struct NotificationRowComponent: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 12) {
-                // Icono genérico (puedes personalizar más adelante según título o mensaje)
+
                 Image(systemName: "bell.fill")
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.blue)
                     .frame(width: 24, height: 24)
 
-                // Contenido
                 VStack(alignment: .leading, spacing: 4) {
                     Text(notification.title)
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.brandPrimary)
                         .multilineTextAlignment(.leading)
+                        .bold()
 
                     Text(notification.message)
                         .font(.system(size: 14))
@@ -49,6 +49,7 @@ struct NotificationRowComponent: View {
 }
 #Preview {
     let sampleNotification = NotificationDTO(
+        id: 1,
         created_by: 1,
         title: "Reporte \"Phishing Banco\" aceptado.",
         message: "Tu reporte fue revisado y aprobado exitosamente."

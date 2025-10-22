@@ -11,6 +11,7 @@ import SwiftUI
 struct NotificationsScreen: View {
     @StateObject private var vm = NotificationsViewModel()
     @State private var selectedNotification: NotificationDTO? = nil
+    
 
     var body: some View {
         NavigationStack {
@@ -23,7 +24,7 @@ struct NotificationsScreen: View {
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.brandPrimary)
                         .padding(.top, 20)
-
+                    
                     if vm.isLoading {
                         Spacer()
                         ProgressView()
@@ -45,6 +46,7 @@ struct NotificationsScreen: View {
 
                         Spacer()
                     } else {ScrollView {
+                        Spacer()
                             LazyVStack(spacing: 12) {
                                 ForEach(vm.notifications, id: \.id) { notification in
                                     NotificationRowComponent(notification: notification) {
