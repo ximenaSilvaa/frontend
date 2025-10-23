@@ -43,33 +43,44 @@ struct LoginScreen: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.white
+                Color.gray.opacity(0.05)
                     .ignoresSafeArea()
 
                 ScrollView {
-                    VStack(spacing: 40) {
+                    VStack(spacing: 25) {
                         // Top spacing
-                        Spacer(minLength: 60)
+                        Spacer(minLength: 120)
 
-                        // Title
-                        Text("Iniciar Sesión")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(.black)
+        
+                        // Title with gradient
+                        VStack(spacing: 6) {
+                            Text("Bienvenido")
+                                .font(.system(size: 28, weight: .bold))
+                                .foregroundColor(.brandPrimary)
+
+                            Text("Inicia sesión para continuar")
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.brandSecondary)
+                        }
 
                         // Form Fields
-                        VStack(spacing: 20) {
+                        VStack(spacing: 18) {
                             // Email Field
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Correo Electrónico")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.black)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.brandPrimary)
 
                                 TextField("ejemplo@email.com", text: $email)
                                     .textFieldStyle(PlainTextFieldStyle())
                                     .padding(.horizontal, 16)
-                                    .padding(.vertical, 12)
-                                    .background(Color.gray.opacity(0.1))
-                                    .cornerRadius(8)
+                                    .padding(.vertical, 14)
+                                    .background(Color.white)
+                                    .cornerRadius(12)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.brandSecondary.opacity(0.2), lineWidth: 1.5)
+                                    )
                                     .autocapitalization(.none)
                                     .keyboardType(.emailAddress)
                             }
@@ -77,8 +88,8 @@ struct LoginScreen: View {
                             // Password Field
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Contraseña")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.black)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.brandPrimary)
 
                                 SecureFieldWithToggle(placeholder: "Contraseña", text: $password)
                             }
@@ -111,35 +122,61 @@ struct LoginScreen: View {
                                 await login()
                             }
                         }) {
-                            Text("Ingresar")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(Color.brandAccent)
-                                .cornerRadius(25)
+                            HStack(spacing: 8) {
+                                Text("Ingresar")
+                                    .font(.system(size: 16, weight: .bold))
+                                if isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                        .scaleEffect(0.8)
+                                }
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color.brandAccent, Color.brandPrimary],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(12)
+                            .shadow(color: Color.brandAccent.opacity(0.3), radius: 8, x: 0, y: 4)
                         }
                         .disabled(isLoading)
-                        .opacity(isLoading ? 0.6 : 1.0)
+                        .opacity(isLoading ? 0.7 : 1.0)
                         .padding(.horizontal, 32)
 
                         // Create Account Link
-                        NavigationLink(destination: ScreenUserRegistration()) {
-                            Text("Crear Cuenta")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.black)
-                                .underline()
+                        HStack(spacing: 4) {
+                            Text("¿No tienes cuenta?")
+                                .font(.system(size: 14))
+                                .foregroundColor(.brandSecondary)
+
+                            NavigationLink(destination: ScreenUserRegistration()) {
+                                Text("Regístrate")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(.brandAccent)
+                            }
                         }
 
-                        // Bottom spacing for keyboard
-                        Spacer(minLength: 40)
-
-                        // Bottom Logo
-                        Image("app-logo")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 120, height: 120)
-                            .padding(.bottom, 30)
+                        // Bottom spacing
+                        Spacer(minLength: 20)
+                        HStack{
+                            // Bottom Logo - Red
+                            Image("app-logo")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 80)
+                                .padding(.bottom, 20)
+                            Image("falcon-logo-icon")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 80)
+                                .padding(.bottom, 20)
+                        }
+                       
                     }
                 }
                 .scrollDismissesKeyboard(.interactively)

@@ -16,6 +16,7 @@ enum ComponentSize {
 struct ComponentReport: View {
     let report: ReportDTO
     let size: ComponentSize
+    var showStatusBadge: Bool = false
 
     @State private var isLiked: Bool = false
     @State private var likeCount: Int = 0
@@ -88,9 +89,37 @@ struct ComponentReport: View {
             isUpdatingLike = false
         }
     }
-    
+
+    private func getStatusText() -> String {
+        switch report.status_id {
+        case 1: return "Pendiente"
+        case 2: return "Aprobado"
+        case 3: return "Rechazado"
+        default: return "Desconocido"
+        }
+    }
+
+    private func getStatusColor() -> Color {
+        switch report.status_id {
+        case 1: return Color.brandPrimary
+        case 2: return Color.brandAccepted
+        case 3: return Color.brandAccent
+        default: return Color.gray
+        }
+    }
+
+    private func getStatusIcon() -> String {
+        switch report.status_id {
+        case 1: return "clock.fill"
+        case 2: return "checkmark.seal.fill"
+        case 3: return "xmark.seal.fill"
+        default: return "questionmark.circle.fill"
+        }
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        ZStack(alignment: .bottomTrailing) {
+            VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 AsyncImage(url: URL(string: report.userImageURL)) { image in
                     image
@@ -167,17 +196,36 @@ struct ComponentReport: View {
                         .frame(width: 280, height: 200)
                 }
             }
+            }
+            .padding()
+            .background(Color.white)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.gray.opacity(0.15), lineWidth: 1)
+            )
+            .frame(width: 350)
+            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
 
+            // Status Badge - Bottom Right Corner (only if showStatusBadge is true)
+            if showStatusBadge {
+                HStack(spacing: 6) {
+                    Image(systemName: getStatusIcon())
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.white)
+
+                    Text(getStatusText())
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(getStatusColor())
+                .cornerRadius(20)
+                .shadow(color: getStatusColor().opacity(0.4), radius: 4, x: 0, y: 2)
+                .offset(x: -12, y: -12)
+            }
         }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(0.15), lineWidth: 1)
-        )
-        .frame(width: 350)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         .onAppear {
             Task {
                 await loadLikeData()

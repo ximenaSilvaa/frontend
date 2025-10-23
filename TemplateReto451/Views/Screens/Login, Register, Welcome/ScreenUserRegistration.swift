@@ -47,65 +47,83 @@ struct ScreenUserRegistration: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.white
+                Color.gray.opacity(0.05)
                     .ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 30) {
-                        // Back Button and Title
+                        // Back Button
                         HStack {
                             Button(action: {
                                 dismiss()
                             }) {
                                 Image(systemName: "chevron.left")
-                                    .font(.system(size: 18, weight: .medium))
-                                    .foregroundColor(.black)
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(.brandPrimary)
+                                    .padding(8)
+                                    .background(Color.white)
+                                    .cornerRadius(8)
                             }
 
                             Spacer()
-
-                            Text("Crear Cuenta")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.black)
-
-                            Spacer()
-
-                            // Invisible spacer for balance
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 18, weight: .medium))
-                                .opacity(0)
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 10)
+
+                        // FalconAlert Logo
+                        Image("falcon-logo-full")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(height: 50)
+                            .padding(.horizontal, 40)
+
+                        // Title
+                        VStack(spacing: 4) {
+                            Text("Crear Cuenta")
+                                .font(.system(size: 26, weight: .bold))
+                                .foregroundColor(.brandPrimary)
+
+                            Text("Únete a la comunidad")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.brandSecondary)
+                        }
 
                         // Form Fields
                         VStack(spacing: 20) {
                             // Full Name Field
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Nombre Completo")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.black)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.brandPrimary)
 
                                 TextField("Ej. Papa Francisco", text: $userForm.name)
                                     .textFieldStyle(PlainTextFieldStyle())
                                     .padding(.horizontal, 16)
-                                    .padding(.vertical, 12)
-                                    .background(Color.gray.opacity(0.1))
-                                    .cornerRadius(8)
+                                    .padding(.vertical, 14)
+                                    .background(Color.white)
+                                    .cornerRadius(12)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.brandSecondary.opacity(0.2), lineWidth: 1.5)
+                                    )
                             }
 
                             // Email Field
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Correo Electrónico")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.black)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.brandPrimary)
 
                                 TextField("ejemplo@email.com", text: $userForm.email)
                                     .textFieldStyle(PlainTextFieldStyle())
                                     .padding(.horizontal, 16)
-                                    .padding(.vertical, 12)
-                                    .background(Color.gray.opacity(0.1))
-                                    .cornerRadius(8)
+                                    .padding(.vertical, 14)
+                                    .background(Color.white)
+                                    .cornerRadius(12)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.brandSecondary.opacity(0.2), lineWidth: 1.5)
+                                    )
                                     .autocapitalization(.none)
                                     .keyboardType(.emailAddress)
                             }
@@ -113,8 +131,8 @@ struct ScreenUserRegistration: View {
                             // Password Field
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Contraseña")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.black)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.brandPrimary)
 
                                 SecureFieldWithToggle(placeholder: "Contraseña", text: $userForm.password)
                             }
@@ -122,8 +140,8 @@ struct ScreenUserRegistration: View {
                             // Confirm Password Field
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Confirmar Contraseña")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.black)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.brandPrimary)
 
                                 SecureFieldWithToggle(placeholder: "Contraseña", text: $userForm.confirmPassword)
                             }
@@ -136,21 +154,21 @@ struct ScreenUserRegistration: View {
                                 acceptTerms.toggle()
                             }) {
                                 Image(systemName: acceptTerms ? "checkmark.square.fill" : "square")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(acceptTerms ? .blue : .gray)
+                                    .font(.system(size: 22))
+                                    .foregroundColor(acceptTerms ? .brandAccent : .gray.opacity(0.5))
                             }
 
                             HStack(spacing: 4) {
                                 Text("Acepto los")
                                     .font(.system(size: 14))
-                                    .foregroundColor(.black)
+                                    .foregroundColor(.brandSecondary)
 
                                 Button(action: {
                                     showTerms = true
                                 }) {
                                     Text("Términos y Condiciones")
-                                        .font(.system(size: 14, weight: .medium))
-                                        .foregroundColor(.blue)
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.brandAccent)
                                         .underline()
                                 }
                             }
@@ -214,27 +232,42 @@ struct ScreenUserRegistration: View {
                                 }
                             }
                         }) {
-                            Text("Crear Cuenta")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(Color.brandAccent)
-                                .cornerRadius(25)
+                            HStack(spacing: 8) {
+                                Text("Crear Cuenta")
+                                    .font(.system(size: 16, weight: .bold))
+                                if isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                        .scaleEffect(0.8)
+                                }
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color.brandAccent, Color.brandPrimary],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(12)
+                            .shadow(color: Color.brandAccent.opacity(0.3), radius: 8, x: 0, y: 4)
                         }
                         .disabled(isLoading)
-                        .opacity(isLoading ? 0.6 : 1.0)
+                        .opacity(isLoading ? 0.7 : 1.0)
                         .padding(.horizontal, 32)
 
-                      
+
+
                         // Bottom spacing for keyboard
                         Spacer(minLength: 60)
 
-                        // Bottom Logo
-                        Image("app-logo")
+                        // Bottom Logo - Falcon Icon
+                        Image("falcon-logo-icon")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(width: 120, height: 120)
+                            .frame(height: 80)
                             .padding(.bottom, 30)
                     }
                 }

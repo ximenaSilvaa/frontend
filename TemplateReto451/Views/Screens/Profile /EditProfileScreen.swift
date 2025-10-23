@@ -32,6 +32,9 @@ struct EditProfileScreen: View {
 
     var body: some View {
         ZStack {
+            Color.gray.opacity(0.05)
+                .ignoresSafeArea()
+
             ScrollView {
                 VStack(spacing: 24) {
                     // Header with back arrow
@@ -48,8 +51,7 @@ struct EditProfileScreen: View {
                     Spacer()
 
                     Text("Editar perfil")
-                        .font(.title2)
-                        .bold()
+                        .font(.system(size: 20, weight: .bold))
                         .foregroundColor(Color.brandPrimary)
 
                     Spacer()
@@ -108,73 +110,66 @@ struct EditProfileScreen: View {
                         showActionSheet = true
                     }) {
                         Text("Editar foto")
-                            .font(.subheadline)
+                            .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(Color.brandAccent)
                     }
                 }
                 .padding(.bottom, 20)
 
                 // Form Fields
-                VStack(spacing: 20) {
+                VStack(spacing: 18) {
                     // Name Field
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Nombre")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color.brandPrimary)
 
                         TextField("", text: $editedName)
+                            .textFieldStyle(PlainTextFieldStyle())
                             .padding(.horizontal, 16)
                             .padding(.vertical, 14)
                             .background(Color.white)
                             .cornerRadius(12)
-                            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.brandSecondary.opacity(0.3), lineWidth: 1.5)
+                                    .stroke(Color.brandSecondary.opacity(0.2), lineWidth: 1.5)
                             )
-                            .font(.body)
                     }
-
-                    Divider()
 
                     // Username Field
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Usuario")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color.brandPrimary)
 
                         TextField("", text: $editedUsername)
+                            .textFieldStyle(PlainTextFieldStyle())
                             .padding(.horizontal, 16)
                             .padding(.vertical, 14)
                             .background(Color.white)
                             .cornerRadius(12)
-                            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.brandSecondary.opacity(0.3), lineWidth: 1.5)
+                                    .stroke(Color.brandSecondary.opacity(0.2), lineWidth: 1.5)
                             )
-                            .font(.body)
                     }
-
-                    Divider()
 
                     // Email Field
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Correo")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color.brandPrimary)
 
                         TextField("", text: $editedEmail)
+                            .textFieldStyle(PlainTextFieldStyle())
                             .padding(.horizontal, 16)
                             .padding(.vertical, 14)
                             .background(Color.white)
                             .cornerRadius(12)
-                            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.brandSecondary.opacity(0.3), lineWidth: 1.5)
+                                    .stroke(Color.brandSecondary.opacity(0.2), lineWidth: 1.5)
                             )
-                            .font(.body)
                             .keyboardType(.emailAddress)
                             .autocapitalization(.none)
                     }
@@ -189,23 +184,30 @@ struct EditProfileScreen: View {
                         await saveProfile()
                     }
                 }) {
-                    HStack {
+                    HStack(spacing: 8) {
+                        Text("Guardar cambios")
+                            .font(.system(size: 16, weight: .bold))
                         if isSaving {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                 .scaleEffect(0.8)
                         }
-                        Text(isSaving ? "Guardando..." : "Guardar")
-                            .font(.headline)
-                            .foregroundColor(.white)
                     }
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(isSaving ? Color.gray : Color.brandAccent)
-                    .cornerRadius(25)
+                    .padding(.vertical, 14)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.brandAccent, Color.brandPrimary],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
                     .shadow(color: Color.brandAccent.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 .disabled(isSaving)
+                .opacity(isSaving ? 0.7 : 1.0)
                 .padding(.horizontal)
                 .padding(.bottom, 30)
                 }
@@ -469,8 +471,8 @@ struct ImagePicker: UIViewControllerRepresentable {
 }
 
 #Preview {
-    @State var sampleProfile = UserProfileDTO.sample
-    return NavigationView {
+    @Previewable @State var sampleProfile = UserProfileDTO.sample
+    NavigationView {
         EditProfileScreen(userProfile: $sampleProfile)
     }
 }

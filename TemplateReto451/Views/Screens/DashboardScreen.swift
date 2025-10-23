@@ -165,14 +165,14 @@ struct DashboardScreen: View {
     struct ReportsByCategoryView: View {
         let topCategoriesReports: [(String, Int)]
         let colorLevel: (Int, Int) -> Double
-        
+
         var body: some View {
             VStack(alignment: .leading) {
                 Text("Reportes por categoría")
                     .font(.title2)
                     .bold()
                     .foregroundColor(.brandAccent)
-                
+
                 HStack {
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(Array(topCategoriesReports.enumerated()), id: \.1.0) { index, item in
@@ -350,10 +350,11 @@ struct DashboardScreen: View {
     struct FooterView: View {
         var body: some View {
             VStack(spacing: 20) {
+                // Red por la Ciberseguridad Logo
                 Image("app-logo")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 70, height: 70)
+                    .frame(width: 100, height: 100)
 
                 Link("Ir a Red por la Ciberseguridad", destination: URL(string: "https://redporlaciberseguridad.org/")!)
                     .foregroundColor(.brandSecondary)
@@ -394,7 +395,13 @@ struct DashboardScreen: View {
                 HStack {
                     GeometryReader { geo in
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.brandSecondary)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.brandAccent, Color.brandPrimary],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
                             .frame(
                                 width: CGFloat(count) / CGFloat(max(maxCount, 1)) * geo.size.width,
                                 height: 14
@@ -433,7 +440,7 @@ struct DashboardScreen: View {
     }
 
 
-    
+
 struct AchievementRow: View {
     let icon: String
     let title: String
@@ -442,11 +449,11 @@ struct AchievementRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(Color.brandPrimary)
+                .foregroundColor(Color.brandAccent)
                 .font(.system(size: 28))
                 .frame(width: 36, height: 36)
-             
-            
+
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.headline)
@@ -458,6 +465,45 @@ struct AchievementRow: View {
             Spacer()
         }
         .padding(.vertical, 6)
+    }
+}
+
+struct ProgressStatCard: View {
+    let title: String
+    let value: String
+    let hasBackground: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(Color.brandSecondary)
+
+            Text(value)
+                .font(.title2)
+                .bold()
+                .foregroundColor(Color.brandPrimary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(
+            hasBackground ?
+            LinearGradient(
+                colors: [Color.gray.opacity(0.08), Color.gray.opacity(0.12)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ) : LinearGradient(
+                colors: [Color.clear, Color.clear],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .cornerRadius(12)
+        .overlay(
+            hasBackground ? nil :
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+        )
     }
 }
 
@@ -540,8 +586,6 @@ struct AchievementRow: View {
                     }
                     .padding(.vertical)
                 }
-                .navigationTitle("Dashboard")
-                .navigationBarTitleDisplayMode(.inline)
                 .task {
                     await viewModel.fetchDashboard()
                 }

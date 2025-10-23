@@ -18,9 +18,13 @@ struct HomeScreen: View {
     private let httpClient = HTTPClient()
     
     var body: some View {
-        VStack {
-            
-            Spacer().frame(height: 15)
+        ZStack {
+            Color.gray.opacity(0.05)
+                .ignoresSafeArea()
+
+            VStack {
+
+                Spacer().frame(height: 15)
             
             HStack {
                 Image(systemName: "magnifyingglass")
@@ -66,29 +70,69 @@ struct HomeScreen: View {
 
                     if isLoading {
                         ProgressView("Cargando reportes...")
+                            .foregroundColor(.brandPrimary)
                             .padding()
                     } else if let error = errorMessage {
-                        VStack(spacing: 12) {
-                            Image(systemName: "exclamationmark.triangle")
-                                .font(.system(size: 48))
-                                .foregroundColor(.orange)
+                        Spacer()
+
+                        VStack(spacing: 16) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 60))
+                                .foregroundColor(.brandAccent)
                             Text("Error al cargar reportes")
-                                .font(.headline)
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.brandPrimary)
                             Text(error)
-                                .font(.caption)
-                                .foregroundColor(.gray)
+                                .font(.system(size: 14))
+                                .foregroundColor(.brandSecondary)
                                 .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
+
                             Button("Reintentar") {
                                 Task {
                                     await loadData()
                                 }
                             }
-                            .padding()
-                            .background(Color.brandAccent)
+                            .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.white)
-                            .cornerRadius(8)
+                            .padding(.horizontal, 32)
+                            .padding(.vertical, 12)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color.brandAccent, Color.brandPrimary],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(12)
+                            .shadow(color: Color.brandAccent.opacity(0.3), radius: 8, x: 0, y: 4)
                         }
-                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 40)
+
+                        Spacer()
+                    } else if reports.isEmpty {
+                        // Empty state when filtering by category
+                        Spacer()
+
+                        VStack(spacing: 16) {
+                            Image(systemName: selectedCategory != nil ? "tray.fill" : "doc.text.magnifyingglass")
+                                .font(.system(size: 70))
+                                .foregroundColor(Color.brandSecondary.opacity(0.6))
+
+                            Text(selectedCategory != nil ? "No hay reportes en esta categoría" : "No hay reportes disponibles")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.brandPrimary)
+
+                            Text(selectedCategory != nil ? "Intenta seleccionar otra categoría" : "Sé el primero en reportar")
+                                .font(.system(size: 14))
+                                .foregroundColor(.brandSecondary)
+                                .multilineTextAlignment(.center)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 40)
+
+                        Spacer()
                     } else {
                         VStack(spacing: 20) {
                             ForEach(reports) { report in
@@ -102,6 +146,7 @@ struct HomeScreen: View {
                     }
                 }
                 .padding(.vertical)
+            }
             }
         }
         .onAppear {

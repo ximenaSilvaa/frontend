@@ -66,7 +66,8 @@ struct UserAllReportsScreen: View {
                     ForEach(reports, id: \.id) { report in
                         ComponentReport(
                             report: report,
-                            size: .small
+                            size: .small,
+                            showStatusBadge: true
                         )
                         .padding(.horizontal)
                     }

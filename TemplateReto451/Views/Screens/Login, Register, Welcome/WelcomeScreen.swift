@@ -15,27 +15,50 @@ struct WelcomeScreen: View {
 
     var body: some View {
         ZStack {
-            Color.white
-                .ignoresSafeArea()
+            // Gradient Background
+            LinearGradient(
+                colors: [
+                    Color.brandPrimary,
+                    Color.brandPrimary.opacity(0.9),
+                    Color.brandAccent.opacity(0.8)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
 
-            VStack(spacing: 20) {
+            VStack(spacing: 50) {
                 Spacer()
 
-                // Logo Section
+                // Main Logo - Falcon
                 VStack(spacing: 20) {
-                    // Official Logo Image
-                    Image("app-logo")
+                    Image("falcon-logo-icon")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 300, height: 300)
+                        .frame(width: 220, height: 220)
+                        .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
+
+                    // App Name/Tagline
+                    Text("FalconAlert")
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundColor(.white)
+                        .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
                 }
 
                 Spacer()
+
+                // Loading Indicator
+                if isValidatingToken {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(1.2)
+                        .padding(.bottom, 40)
+                }
             }
+            .padding(.horizontal, 40)
         }
         .onAppear {
             Task {
-                // If user is supposed to be logged in, validate the token first
                 if isLoggedIn {
                     isValidatingToken = true
                     do {

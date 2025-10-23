@@ -11,15 +11,15 @@ struct UserPostInfoDTO: Codable {
     let total: Int
     let protegidas: Int
     let pendiente: Int?
-    let proceso: Int?
-    let resuelto: Int?
+    let aprobada: Int?
+    let rechazada: Int?
 
     enum CodingKeys: String, CodingKey {
         case total
         case protegidas
         case pendiente
-        case proceso
-        case resuelto
+        case aprobada
+        case rechazada
     }
 
     // Computed properties for easier access
@@ -32,6 +32,14 @@ struct UserPostInfoDTO: Codable {
     }
 
     var inProcess: Int {
-        return (proceso ?? 0) + (pendiente ?? 0)
+        return pendiente ?? 0
+    }
+
+    var approved: Int {
+        return aprobada ?? 0
+    }
+
+    var rejected: Int {
+        return rechazada ?? 0
     }
 }

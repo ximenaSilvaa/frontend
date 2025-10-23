@@ -104,8 +104,8 @@ struct ProfileScreen: View {
 
                     HStack(spacing: 20) {
                         StatisticItem(
-                            number: userPostInfo?.totalReports ?? userProfile.stats.reports,
-                            label: "Reportes",
+                            number: userPostInfo?.approved ?? userProfile.stats.reports,
+                            label: "Reportes aceptados",
                             color: Color.brandAccent
                         )
 
@@ -175,7 +175,8 @@ struct ProfileScreen: View {
                         ForEach(Array(userReports.prefix(5)), id: \.id) { report in
                             ComponentReport(
                                 report: report,
-                                size: .small
+                                size: .small,
+                                showStatusBadge: true
                             )
                             .padding(.horizontal)
                         }

@@ -36,11 +36,11 @@ struct NotificationsScreen: View {
                         VStack(spacing: 12) {
                             Image(systemName: "bell.slash")
                                 .font(.system(size: 70))
-                                .foregroundColor(.gray.opacity(0.5))
+                                .foregroundColor(Color.brandSecondary.opacity(0.6))
 
                             Text("No tienes notificaciones aún")
                                 .font(.subheadline)
-                                .foregroundColor(.gray)
+                                .foregroundColor(.brandSecondary)
                                 .multilineTextAlignment(.center)
                         }
 

@@ -139,24 +139,30 @@ struct ScreenPasswordChange: View {
                         await vm.changePassword()
                     }
                 } label: {
-                    if vm.isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color.brandAccent)
-                            .cornerRadius(25)
-                    } else {
+                    HStack(spacing: 8) {
                         Text("Cambiar contraseña")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color.brandAccent)
-                            .cornerRadius(25)
+                            .font(.system(size: 16, weight: .bold))
+                        if vm.isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .scaleEffect(0.8)
+                        }
                     }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.brandAccent, Color.brandPrimary],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
+                    .shadow(color: Color.brandAccent.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 .disabled(vm.isLoading)
+                .opacity(vm.isLoading ? 0.7 : 1.0)
                 .padding(.horizontal)
                 .padding(.top, 20)
 

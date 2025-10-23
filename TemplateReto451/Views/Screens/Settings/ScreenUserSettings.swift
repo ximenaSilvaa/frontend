@@ -94,23 +94,30 @@ struct ScreenUserSettings: View {
                 Button(action: {
                     logout()
                 }) {
-                    HStack {
+                    HStack(spacing: 8) {
+                        Text("Cerrar sesión")
+                            .font(.system(size: 16, weight: .bold))
                         if isLoggingOut {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                 .scaleEffect(0.8)
                         }
-                        Text("Cerrar sesión")
-                            .fontWeight(.semibold)
                     }
-                    .padding()
-                    .frame(maxWidth: .infinity)
                     .foregroundColor(.white)
-                    .background(isLoggingOut ? Color.brandAccent.opacity(0.6) : Color.brandAccent)
-                    .cornerRadius(20)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.brandAccent, Color.brandPrimary],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
                     .shadow(color: Color.brandAccent.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 .disabled(isLoggingOut)
+                .opacity(isLoggingOut ? 0.7 : 1.0)
                 
                 //Change
                 Spacer()

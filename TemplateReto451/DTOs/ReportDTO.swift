@@ -17,15 +17,46 @@ struct ReportDTO: Codable, Identifiable,  Hashable {
     let user_image: String
     let report_url: String
     let categories: [Int]
+    let created_at: String
+    let updated_at: String
+    let status_id: Int
 
-    
+
     var imageURL: String {
         return "http://18.222.210.25/\(image)"
     }
 
- 
+
     var userImageURL: String {
         return "http://18.222.210.25/\(user_image)"
+    }
+
+    var createdDate: Date? {
+        // Intentar ISO8601DateFormatter primero
+        let iso8601Formatter = ISO8601DateFormatter()
+        iso8601Formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = iso8601Formatter.date(from: created_at) {
+            return date
+        }
+
+        // Intentar sin milisegundos
+        iso8601Formatter.formatOptions = [.withInternetDateTime]
+        if let date = iso8601Formatter.date(from: created_at) {
+            return date
+        }
+
+        // Intentar con DateFormatter como fallback
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        if let date = dateFormatter.date(from: created_at) {
+            return date
+        }
+
+        // Intentar sin milisegundos
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        return dateFormatter.date(from: created_at)
     }
 }
 
@@ -40,7 +71,10 @@ extension ReportDTO {
         created_by: 1,
         user_image: "user-pictures/default-avatar.jpg",
         report_url: "http://banco-seguro-falso.com",
-        categories: [1, 5]
+        categories: [1, 5],
+        created_at: "2025-09-27T23:50:39.000Z",
+        updated_at: "2025-09-27T23:50:39.000Z",
+        status_id: 2
     )
 }
 

@@ -22,18 +22,19 @@ struct UserProfileDTO {
     }
 }
 
-// Sample data for preview/testing
 extension UserProfileDTO {
-    static let sample = UserProfileDTO(
-        username: "AnaTrailera300",
-        name: "Ana Sánchez Ramos",
-        location: "Ciudad de México, México",
-        email: "ana@gmail.com",
-        profileImage: Image("userprofile"),
-        stats: ProfileStats(
-            reports: 8,
-            protectedPeople: 1,
-            inProcess: 1
+    static var sample: UserProfileDTO {
+        UserProfileDTO(
+            username: "usuario_ejemplo",
+            name: "Usuario Ejemplo",
+            location: "Ciudad, País",
+            email: "ejemplo@correo.com",
+            profileImage: Image(systemName: "person.circle.fill"),
+            stats: ProfileStats(
+                reports: 5,
+                protectedPeople: 10,
+                inProcess: 2
+            )
         )
-    )
+    }
 }
