@@ -20,42 +20,59 @@ struct NotificationsScreen: View {
                     .ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    Text("Notificaciones")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.brandPrimary)
-                        .padding(.top, 20)
-                    
+                    // Header
+                    HStack {
+                        Text("Notificaciones")
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundColor(.brandPrimary)
+
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    .padding(.bottom, 16)
+
                     if vm.isLoading {
                         Spacer()
-                        ProgressView()
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .scaleEffect(1.2)
+                            Text("Cargando notificaciones...")
+                                .font(.system(size: 16))
+                                .foregroundColor(.brandSecondary)
+                        }
                         Spacer()
                     } else if vm.notifications.isEmpty {
-                        
                         Spacer()
 
-                        VStack(spacing: 12) {
-                            Image(systemName: "bell.slash")
+                        VStack(spacing: 16) {
+                            Image(systemName: "bell.slash.fill")
                                 .font(.system(size: 70))
                                 .foregroundColor(Color.brandSecondary.opacity(0.6))
 
-                            Text("No tienes notificaciones aún")
-                                .font(.subheadline)
+                            Text("No tienes notificaciones")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.brandPrimary)
+
+                            Text("Cuando recibas actualizaciones importantes, aparecerán aquí")
+                                .font(.system(size: 14))
                                 .foregroundColor(.brandSecondary)
                                 .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
                         }
 
                         Spacer()
-                    } else {ScrollView {
-                        Spacer()
+                    } else {
+                        ScrollView {
                             LazyVStack(spacing: 12) {
                                 ForEach(vm.notifications, id: \.id) { notification in
                                     NotificationRowComponent(notification: notification) {
                                         selectedNotification = notification
                                     }
-                                    .padding(.horizontal, 16)
                                 }
                             }
-                            .padding(.top, 10)
+                            .padding(.horizontal, 20)
+                            .padding(.top, 8)
                             .padding(.bottom, 40)
                         }
                     }
