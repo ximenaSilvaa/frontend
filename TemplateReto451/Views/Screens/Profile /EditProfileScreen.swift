@@ -2,7 +2,7 @@
 //  EditProfileScreen.swift
 //  TemplateReto451
 //
-//  Created by User on 18/09/25.
+//  Created by Ximena Silva Bárcena on 18/09/25.
 //
 
 import SwiftUI

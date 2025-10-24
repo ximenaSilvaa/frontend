@@ -2,7 +2,7 @@
 //  ScreenPasswordChange.swift
 //  TemplateReto451
 //
-//  Created by Claude on 19/09/25.
+//  Created by Ximena Silva Bárcena on 19/09/25.
 //
 import SwiftUI
 

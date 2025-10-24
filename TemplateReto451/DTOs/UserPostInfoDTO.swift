@@ -2,7 +2,7 @@
 //  UserPostInfoDTO.swift
 //  TemplateReto451
 //
-//  Created by Claude Code
+//  Created by Ximena Silva Bárcena on 18/09/25.
 //
 
 import Foundation

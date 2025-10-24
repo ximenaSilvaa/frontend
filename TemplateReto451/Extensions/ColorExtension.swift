@@ -2,7 +2,7 @@
 //  ColorExtension.swift
 //  TemplateReto451
 //
-//  Created by Claude on 26/09/25.
+//  Created by Ximena Silva Bárcena on 26/09/25.
 //
 
 import SwiftUI
@@ -15,7 +15,7 @@ extension Color {
     static let brandAccepted = Color(hex: "#1ABC9C") // Green - accepted reports
 
     // Legacy color replacement
-    static let appBlue = brandPrimary // Replaces Color(red: 4/255, green: 9/255, blue: 69/255)
+    static let appBlue = brandPrimary 
 
     // Convenience initializer for hex colors
     init(hex: String) {

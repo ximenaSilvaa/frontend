@@ -2,18 +2,19 @@
 //  HomeScreen.swift
 //  TemplateReto451
 //
-//  Created by José Molina on 09/09/25.
+//  Created by Ximena Silva Bárcena on 09/09/25.
 //
 import SwiftUI
 
 struct HomeScreen: View {
     @State private var searchText: String = ""
-    @State private var selectedCategory: Int? = nil
+    @State private var selectedCategories: Set<Int> = []
     @State private var reports: [ReportDTO] = []
     @State private var allReports: [ReportDTO] = []
     @State private var categories: [CategoryDTO] = []
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
+    @State private var showCategoryModal: Bool = false
 
     private let httpClient = HTTPClient()
     
@@ -22,50 +23,112 @@ struct HomeScreen: View {
             Color.gray.opacity(0.05)
                 .ignoresSafeArea()
 
-            VStack {
+            VStack(spacing: 0) {
 
-                Spacer().frame(height: 15)
-            
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.brandSecondary)
-                    .font(.system(size: 16, weight: .medium))
-                TextField("Buscar reportes...", text: $searchText)
-                    .autocapitalization(.none)
-                    .disableAutocorrection(true)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.brandPrimary)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .background(Color.white)
-            .cornerRadius(20)
-            .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color.brandSecondary.opacity(0.2), lineWidth: 1.5)
-            )
-            .padding(.horizontal, 20)
-            
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            ForEach(categories) { category in
-                                FilterTab(
-                                    title: category.name,
-                                    isSelected: selectedCategory == category.id,
-                                    action: {
-                                        selectedCategory = selectedCategory == category.id ? nil : category.id
-                                        filterReports()
-                                    }
-                                )
+                Spacer().frame(height: 20)
+
+            // Search Bar with Category Button
+            HStack(spacing: 12) {
+                // Search Bar
+                HStack(spacing: 14) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.brandAccent)
+                        .font(.system(size: 18, weight: .semibold))
+
+                    TextField("Buscar reportes...", text: $searchText)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.brandPrimary)
+
+                    if !searchText.isEmpty {
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                searchText = ""
                             }
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.brandSecondary.opacity(0.6))
+                                .font(.system(size: 18, weight: .medium))
                         }
-                        .padding(.horizontal)
+                        .transition(.scale.combined(with: .opacity))
                     }
-                    .frame(height: 60)
+                }
+                .padding(.horizontal, 18)
+                .padding(.vertical, 16)
+                .background(
+                    LinearGradient(
+                        colors: [Color.white, Color.white.opacity(0.98)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .cornerRadius(18)
+                .shadow(color: Color.brandAccent.opacity(0.08), radius: 12, x: 0, y: 6)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.brandAccent.opacity(0.3), Color.brandPrimary.opacity(0.2)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                )
+
+                // Category Filter Button
+                Button(action: {
+                    showCategoryModal = true
+                }) {
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: "line.3.horizontal.decrease.circle.fill")
+                            .font(.system(size: 28, weight: .semibold))
+                            .foregroundColor(.brandAccent)
+                            .padding(12)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color.white, Color.white.opacity(0.98)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .cornerRadius(18)
+                            .shadow(color: Color.brandAccent.opacity(0.08), radius: 12, x: 0, y: 6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 18)
+                                    .stroke(
+                                        LinearGradient(
+                                            colors: [Color.brandAccent.opacity(0.3), Color.brandPrimary.opacity(0.2)],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1.5
+                                    )
+                            )
+
+                        // Badge showing selected count
+                        if !selectedCategories.isEmpty {
+                            Text("\(selectedCategories.count)")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding(5)
+                                .background(
+                                    Circle()
+                                        .fill(Color.brandAccent)
+                                        .shadow(color: Color.brandAccent.opacity(0.4), radius: 4, x: 0, y: 2)
+                                )
+                                .offset(x: 4, y: -4)
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+
+            Spacer().frame(height: 20)
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
                     
 
                     if isLoading {
@@ -115,34 +178,42 @@ struct HomeScreen: View {
                         // Empty state when filtering by category
                         Spacer()
 
-                        VStack(spacing: 16) {
-                            Image(systemName: selectedCategory != nil ? "tray.fill" : "doc.text.magnifyingglass")
-                                .font(.system(size: 70))
-                                .foregroundColor(Color.brandSecondary.opacity(0.6))
+                        VStack(spacing: 20) {
+                            Image(systemName: !selectedCategories.isEmpty ? "tray.fill" : "doc.text.magnifyingglass")
+                                .font(.system(size: 75))
+                                .foregroundColor(Color.brandAccent.opacity(0.7))
+                                .shadow(color: Color.brandAccent.opacity(0.2), radius: 8, x: 0, y: 4)
 
-                            Text(selectedCategory != nil ? "No hay reportes en esta categoría" : "No hay reportes disponibles")
-                                .font(.system(size: 18, weight: .semibold))
+                            Text(!selectedCategories.isEmpty ? "No hay reportes en estas categorías" : "No hay reportes disponibles")
+                                .font(.system(size: 20, weight: .bold))
                                 .foregroundColor(.brandPrimary)
 
-                            Text(selectedCategory != nil ? "Intenta seleccionar otra categoría" : "Sé el primero en reportar")
-                                .font(.system(size: 14))
+                            Text(!selectedCategories.isEmpty ? "Intenta seleccionar otras categorías" : "Sé el primero en reportar")
+                                .font(.system(size: 15, weight: .medium))
                                 .foregroundColor(.brandSecondary)
                                 .multilineTextAlignment(.center)
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal, 40)
+                        .padding(.vertical, 40)
+                        .transition(.scale.combined(with: .opacity))
 
                         Spacer()
                     } else {
-                        VStack(spacing: 20) {
+                        LazyVStack(spacing: 24) {
                             ForEach(reports) { report in
                                 ComponentReport(
                                     report: report,
                                     size: .normal
                                 )
+                                .transition(.asymmetric(
+                                    insertion: .scale(scale: 0.9).combined(with: .opacity),
+                                    removal: .scale(scale: 0.9).combined(with: .opacity)
+                                ))
                             }
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 20)
                     }
                 }
                 .padding(.vertical)
@@ -156,6 +227,20 @@ struct HomeScreen: View {
         }
         .onChange(of: searchText) { _ in
             filterReports()
+        }
+        .onChange(of: selectedCategories) { _ in
+            withAnimation(.easeInOut(duration: 0.3)) {
+                filterReports()
+            }
+        }
+        .sheet(isPresented: $showCategoryModal) {
+            CategoryDropdown(
+                categories: categories,
+                selectedCategoryIds: $selectedCategories,
+                isPresented: $showCategoryModal
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
     }
 
@@ -183,10 +268,11 @@ struct HomeScreen: View {
     private func filterReports() {
         var filtered = allReports
 
-        // Filter by category
-        if let categoryId = selectedCategory {
+        // Filter by categories (multiple selection)
+        if !selectedCategories.isEmpty {
             filtered = filtered.filter { report in
-                report.categories.contains(categoryId)
+                // Check if report contains ANY of the selected categories
+                !selectedCategories.isDisjoint(with: Set(report.categories))
             }
         }
 

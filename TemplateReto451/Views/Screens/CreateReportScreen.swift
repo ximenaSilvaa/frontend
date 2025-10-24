@@ -9,6 +9,7 @@ import PhotosUI
 
 struct CreateReportScreen: View {
     @StateObject private var viewModel = CreateReportViewModel()
+    @State private var showCategoryModal: Bool = false
 
     var body: some View {
         ZStack {
@@ -109,21 +110,43 @@ struct CreateReportScreen: View {
                         ProgressView("Cargando categorías...")
                             .padding()
                     } else {
-                        ScrollView(.horizontal, showsIndicators: false) {
+                        Button(action: {
+                            showCategoryModal = true
+                        }) {
                             HStack(spacing: 12) {
-                                ForEach(viewModel.categories) { category in
-                                    FilterTab(
-                                        title: category.name,
-                                        isSelected: viewModel.selectedCategoryId == category.id,
-                                        action: {
-                                            viewModel.selectedCategoryId =
-                                                viewModel.selectedCategoryId == category.id ? nil : category.id
-                                        }
-                                    )
-                                }
+                                Image(systemName: "line.3.horizontal.decrease.circle.fill")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(.brandAccent)
+
+                                Text(viewModel.selectedCategoryIds.isEmpty
+                                    ? "Selecciona categorías"
+                                    : viewModel.selectedCategoryIds.count == 1
+                                        ? viewModel.categories.first(where: { $0.id == viewModel.selectedCategoryIds.first })?.name ?? "1 categoría seleccionada"
+                                        : "\(viewModel.selectedCategoryIds.count) categorías seleccionadas")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(viewModel.selectedCategoryIds.isEmpty ? .brandSecondary : .brandPrimary)
+
+                                Spacer()
+
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(.brandSecondary)
                             }
-                            .padding(.vertical, 4)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 14)
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(
+                                        viewModel.selectedCategoryIds.isEmpty
+                                            ? Color.brandSecondary.opacity(0.2)
+                                            : Color.brandAccent.opacity(0.3),
+                                        lineWidth: 1.5
+                                    )
+                            )
                         }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
 
@@ -235,6 +258,15 @@ struct CreateReportScreen: View {
         }
         .task {
             await viewModel.loadInitialData()
+        }
+        .sheet(isPresented: $showCategoryModal) {
+            CategoryDropdown(
+                categories: viewModel.categories,
+                selectedCategoryIds: $viewModel.selectedCategoryIds,
+                isPresented: $showCategoryModal
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
     }
 }

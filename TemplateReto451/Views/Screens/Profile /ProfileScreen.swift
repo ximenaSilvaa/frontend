@@ -2,7 +2,7 @@
 //  ProfileScreen.swift
 //  TemplateReto451
 //
-//  Created by User on 18/09/25.
+//  Created by Ximena Silva Bárcena on 18/09/25.
 //
 
 import SwiftUI
@@ -147,7 +147,7 @@ struct ProfileScreen: View {
 
                         Spacer()
 
-                        if userReports.count > 5 {
+                        if userReports.count > 3 {
                             NavigationLink(destination: UserAllReportsScreen(reports: userReports)) {
                                 Text("Ver todos")
                                     .font(.subheadline)
@@ -171,8 +171,8 @@ struct ProfileScreen: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 40)
                     } else {
-                        // Display up to 5 reports
-                        ForEach(Array(userReports.prefix(5)), id: \.id) { report in
+                        // Display up to 3 most recent reports
+                        ForEach(Array(userReports.prefix(3)), id: \.id) { report in
                             ComponentReport(
                                 report: report,
                                 size: .small,
@@ -208,8 +208,18 @@ struct ProfileScreen: View {
             async let postInfo = httpClient.getUserPostInfo()
 
             userData = try await profile
-            userReports = try await reports
+            let fetchedReports = try await reports
             userPostInfo = try await postInfo
+
+            // Sort reports by created_at (newest first)
+            userReports = fetchedReports.sorted { report1, report2 in
+                guard let date1 = report1.createdDate,
+                      let date2 = report2.createdDate else {
+                    // If dates can't be parsed, keep original order
+                    return false
+                }
+                return date1 > date2
+            }
 
             isLoading = false
         } catch {

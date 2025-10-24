@@ -1,6 +1,6 @@
 //
 //  HTTPClient.swift
-//  Improved Implementation
+//  
 //
 
 import Foundation

@@ -119,67 +119,100 @@ struct ComponentReport: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 12) {
                 AsyncImage(url: URL(string: report.userImageURL)) { image in
                     image
                         .resizable()
-                        .frame(width: 40, height: 40)
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 48, height: 48)
                         .clipShape(Circle())
+                        .overlay(
+                            Circle()
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [Color.brandAccent.opacity(0.3), Color.brandPrimary.opacity(0.2)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 2
+                                )
+                        )
+                        .shadow(color: Color.brandAccent.opacity(0.15), radius: 4, x: 0, y: 2)
                 } placeholder: {
-                    Image(systemName: "person.circle.fill")
-                        .resizable()
-                        .frame(width: 40, height: 40)
-                        .foregroundColor(.gray)
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.brandAccent.opacity(0.1), Color.brandPrimary.opacity(0.1)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                        Image(systemName: "person.circle.fill")
+                            .resizable()
+                            .frame(width: 48, height: 48)
+                            .foregroundColor(.brandSecondary.opacity(0.5))
+                    }
+                    .frame(width: 48, height: 48)
                 }
 
                 Text(report.user_name)
-                    .font(.headline)
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(Color.brandPrimary)
 
                 Spacer()
 
-                VStack(spacing: 4) {
-                    Button(action: toggleLike) {
-                        Image(systemName: isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
-                            .imageScale(.large)
-                            .foregroundStyle(isLiked ? Color.brandAccent : Color.brandAccent)
+                HStack(spacing: 16) {
+                    VStack(spacing: 6) {
+                        Button(action: toggleLike) {
+                            Image(systemName: isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(isLiked ? Color.brandAccent : Color.brandSecondary.opacity(0.6))
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .scaleEffect(isLiked ? 1.1 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isLiked)
+
+                        Text("\(likeCount)")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(isLiked ? Color.brandAccent : Color.brandSecondary)
                     }
-                    .buttonStyle(PlainButtonStyle())
 
-                    Text("\(likeCount)")
-                        .font(.caption)
-                        .foregroundColor(isLiked ? Color.brandPrimary : Color.brandPrimary)
-                }
+                    VStack(spacing: 6) {
+                        Button(action: { showingShareSheet = true }) {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(Color.brandSecondary.opacity(0.6))
+                        }
+                        .buttonStyle(PlainButtonStyle())
 
-                VStack(spacing: 4) {
-                    Button(action: { showingShareSheet = true }) {
-                        Image(systemName: "square.and.arrow.up")
-                            .imageScale(.large)
-                            .foregroundStyle(Color.brandAccent)
+                        Text("")
+                            .font(.system(size: 13))
+                            .foregroundColor(.clear)
                     }
-                    .buttonStyle(PlainButtonStyle())
-
-                    Text("")
-                        .font(.caption)
-                        .foregroundColor(.clear)
                 }
             }
 
             Text(report.title)
-                .font(.title2)
-                .bold()
+                .font(.system(size: 22, weight: .bold))
                 .foregroundColor(Color.brandPrimary)
+                .lineLimit(2)
 
             Text(abbreviatedDescription(report.description, limit: size == .small ? 100 : 250))
-                .font(.body)
-                .foregroundColor(.black)
+                .font(.system(size: 16, weight: .regular))
+                .foregroundColor(Color.brandSecondary.opacity(0.9))
+                .lineSpacing(4)
 
             // Calling with the id
             NavigationLink(destination: Report(report: report)) {
-                Text("Mostrar más")
-                    .font(.caption)
-                    .foregroundColor(.brandAccent)
+                HStack(spacing: 6) {
+                    Text("Mostrar más")
+                        .font(.system(size: 15, weight: .semibold))
+                    Image(systemName: "arrow.right.circle.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                }
+                .foregroundColor(.brandAccent)
             }
 
             if size == .normal {
@@ -187,43 +220,76 @@ struct ComponentReport: View {
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 280)
-                        .cornerRadius(10)
-                        .padding(.top, 8)
                         .frame(maxWidth: .infinity)
+                        .cornerRadius(14)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color.brandSecondary.opacity(0.15), lineWidth: 1)
+                        )
+                        .shadow(color: Color.black.opacity(0.08), radius: 6, x: 0, y: 3)
+                        .padding(.top, 4)
                 } placeholder: {
-                    ProgressView()
-                        .frame(width: 280, height: 200)
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.gray.opacity(0.1))
+                        ProgressView()
+                            .tint(.brandAccent)
+                    }
+                    .frame(height: 200)
                 }
             }
             }
-            .padding()
-            .background(Color.white)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.gray.opacity(0.15), lineWidth: 1)
+            .padding(20)
+            .background(
+                LinearGradient(
+                    colors: [Color.white, Color.white.opacity(0.98)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
             )
-            .frame(width: 350)
-            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+            .cornerRadius(18)
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.brandAccent.opacity(0.15), Color.brandPrimary.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+            )
+            .frame(maxWidth: 360)
+            .shadow(color: Color.brandAccent.opacity(0.08), radius: 12, x: 0, y: 6)
+            .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
 
             // Status Badge - Bottom Right Corner (only if showStatusBadge is true)
             if showStatusBadge {
-                HStack(spacing: 6) {
+                HStack(spacing: 7) {
                     Image(systemName: getStatusIcon())
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
 
                     Text(getStatusText())
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
-                .background(getStatusColor())
-                .cornerRadius(20)
-                .shadow(color: getStatusColor().opacity(0.4), radius: 4, x: 0, y: 2)
-                .offset(x: -12, y: -12)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 9)
+                .background(
+                    LinearGradient(
+                        colors: [getStatusColor(), getStatusColor().opacity(0.85)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .cornerRadius(22)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22)
+                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                )
+                .shadow(color: getStatusColor().opacity(0.4), radius: 8, x: 0, y: 4)
+                .offset(x: -14, y: -14)
             }
         }
         .onAppear {
@@ -305,87 +371,157 @@ struct Report: View {
     }
     
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 10) {
-                    AsyncImage(url: URL(string: report.userImageURL)) { image in
-                        image
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .clipShape(Circle())
-                    } placeholder: {
-                        Image(systemName: "person.circle.fill")
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .foregroundColor(.gray)
+        ZStack {
+            Color.gray.opacity(0.05)
+                .ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    HStack(spacing: 12) {
+                        AsyncImage(url: URL(string: report.userImageURL)) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 48, height: 48)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(
+                                            LinearGradient(
+                                                colors: [Color.brandAccent.opacity(0.3), Color.brandPrimary.opacity(0.2)],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 2
+                                        )
+                                )
+                                .shadow(color: Color.brandAccent.opacity(0.15), radius: 4, x: 0, y: 2)
+                        } placeholder: {
+                            ZStack {
+                                Circle()
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [Color.brandAccent.opacity(0.1), Color.brandPrimary.opacity(0.1)],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                Image(systemName: "person.circle.fill")
+                                    .resizable()
+                                    .frame(width: 48, height: 48)
+                                    .foregroundColor(.brandSecondary.opacity(0.5))
+                            }
+                            .frame(width: 48, height: 48)
+                        }
+
+                        Text(report.user_name)
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(Color.brandPrimary)
+
+                        Spacer()
+
+                        HStack(spacing: 16) {
+                            VStack(spacing: 6) {
+                                Button(action: toggleLike) {
+                                    Image(systemName: isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                        .font(.system(size: 22, weight: .semibold))
+                                        .foregroundStyle(isLiked ? Color.brandAccent : Color.brandSecondary.opacity(0.6))
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                .scaleEffect(isLiked ? 1.1 : 1.0)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isLiked)
+
+                                Text("\(likeCount)")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(isLiked ? Color.brandAccent : Color.brandSecondary)
+                            }
+
+                            VStack(spacing: 6) {
+                                Button(action: { showingShareSheet = true }) {
+                                    Image(systemName: "square.and.arrow.up")
+                                        .font(.system(size: 22, weight: .semibold))
+                                        .foregroundStyle(Color.brandSecondary.opacity(0.6))
+                                }
+                                .buttonStyle(PlainButtonStyle())
+
+                                Text("")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.clear)
+                            }
+                        }
                     }
 
-                    Text(report.user_name)
-                        .font(.headline)
+                    Divider()
+                        .background(Color.brandSecondary.opacity(0.2))
+
+                    Text(report.title)
+                        .font(.system(size: 26, weight: .bold))
                         .foregroundColor(Color.brandPrimary)
 
-                    Spacer()
+                    Text(report.description)
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundColor(Color.brandSecondary.opacity(0.9))
+                        .lineSpacing(6)
 
-                    VStack(spacing: 4) {
-                        Button(action: toggleLike) {
-                            Image(systemName: isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
-                                .imageScale(.large)
-                                .foregroundStyle(isLiked ? Color.brandAccent : Color.brandAccent)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Liga fraudulenta:")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(Color.brandPrimary)
+
+                        Text(report.report_url)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(.brandAccent)
+                            .underline()
+                    }
+                    .padding(.vertical, 8)
+
+                    AsyncImage(url: URL(string: report.imageURL)) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: .infinity)
+                            .cornerRadius(16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.brandSecondary.opacity(0.15), lineWidth: 1)
+                            )
+                            .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+                    } placeholder: {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.gray.opacity(0.1))
+                            ProgressView()
+                                .tint(.brandAccent)
                         }
-                        .buttonStyle(PlainButtonStyle())
-
-                        Text("\(likeCount)")
-                            .font(.caption)
-                            .foregroundColor(isLiked ? Color.brandPrimary : Color.brandPrimary)
+                        .frame(height: 250)
                     }
 
-                    VStack(spacing: 4) {
-                        Button(action: { showingShareSheet = true }) {
-                            Image(systemName: "square.and.arrow.up")
-                                .imageScale(.large)
-                                .foregroundStyle(Color.brandAccent)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-
-                        Text("")
-                            .font(.caption)
-                            .foregroundColor(.clear)
-                    }
                 }
-
-                Text(report.title)
-                    .font(.title2)
-                    .bold()
-                    .foregroundColor(Color.brandPrimary)
-
-                Text(report.description)
-                    .foregroundColor(.black)
-
-                Text("Liga fraudulenta:")
-                    .bold()
-                    .foregroundColor(Color.brandPrimary)
-
-                Text(report.report_url)
-                    .foregroundColor(.blue)
-                    .underline()
-
-                AsyncImage(url: URL(string: report.imageURL)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 280)
-                        .cornerRadius(10)
-                        .padding(.top, 8)
-                        .frame(maxWidth: .infinity)
-                } placeholder: {
-                    ProgressView()
-                        .frame(width: 280, height: 200)
-                }
-
+                .padding(24)
+                .background(
+                    LinearGradient(
+                        colors: [Color.white, Color.white.opacity(0.98)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .cornerRadius(20)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.brandAccent.opacity(0.15), Color.brandPrimary.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                )
+                .shadow(color: Color.brandAccent.opacity(0.08), radius: 12, x: 0, y: 6)
+                .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 20)
             }
-            .padding()
-            .frame(width: 350)
-            .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
         }
         .onAppear {
             Task {

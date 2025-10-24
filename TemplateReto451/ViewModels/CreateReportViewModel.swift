@@ -15,7 +15,7 @@ final class CreateReportViewModel: ObservableObject {
     @Published var description: String = ""
     @Published var reportURL: String = ""
     @Published var imageData: Data? = nil
-    @Published var selectedCategoryId: Int? = nil
+    @Published var selectedCategoryIds: Set<Int> = []
     @Published var isAnonymousPreferred: Bool = false
     
     @Published var categories: [CategoryDTO] = []
@@ -73,7 +73,7 @@ final class CreateReportViewModel: ObservableObject {
                 title: title.trimmingCharacters(in: .whitespacesAndNewlines),
                 description: description.trimmingCharacters(in: .whitespacesAndNewlines),
                 status_id: 1,
-                category: [selectedCategoryId ?? 0],
+                category: Array(selectedCategoryIds),
                 report_url: safeReportURL,
                 image: uploadedImagePath,
                 is_anonymous: isAnonymousPreferred ? 1 : 0
@@ -98,8 +98,8 @@ final class CreateReportViewModel: ObservableObject {
             showAlert(message: "La descripción no puede estar vacía.")
             return false
         }
-        if selectedCategoryId == nil {
-            showAlert(message: "Debes seleccionar una categoría.")
+        if selectedCategoryIds.isEmpty {
+            showAlert(message: "Debes seleccionar al menos una categoría.")
             return false
         }
        
@@ -128,7 +128,7 @@ final class CreateReportViewModel: ObservableObject {
         description = ""
         reportURL = ""
         imageData = nil
-        selectedCategoryId = nil
+        selectedCategoryIds.removeAll()
         isAnonymousPreferred = false
     }
     
