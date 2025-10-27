@@ -11,17 +11,38 @@ struct AuthenticationViewModel{
     let httpClient: HTTPClient
 
     func registerUser(name: String, email: String, password: String) async throws -> RegisterResponse {
-        let registrationResponse = try await httpClient.registerUser(name: name, email: email, password: password)
+        // ✅ SECURE: Protect password in memory
+        let securePassword = MemorySecureString(password)
+        defer {
+            // ✅ CRITICAL: Clean password from memory immediately after use
+            securePassword.clear()
+        }
+
+        let registrationResponse = try await httpClient.registerUser(
+            name: name,
+            email: email,
+            password: securePassword.plaintext()
+        )
+
+        SecureLogger.logAuthenticationEvent("register", success: true)
         return registrationResponse
     }
-    func loginUser(email: String, password: String) async throws -> Bool{
-        let loginResponse = try await httpClient.loginUser(email: email, password: password)
+    func loginUser(email: String, password: String) async throws -> Bool {
+        // ✅ SECURE: Protect password in memory
+        let securePassword = MemorySecureString(password)
+        defer {
+            // ✅ CRITICAL: Clean password from memory immediately after use
+            securePassword.clear()
+        }
 
-        TokenStorage.shared.save(token: loginResponse.accessToken, identifier: "accessToken")
-        TokenStorage.shared.save(token: loginResponse.refreshToken, identifier: "refreshToken")
+        let loginResponse = try await httpClient.loginUser(email: email, password: securePassword.plaintext())
 
+        // ✅ SECURE: Using Keychain via SecureTokenStorage
+        SecureTokenStorage.shared.save(token: loginResponse.accessToken, identifier: "accessToken")
+        SecureTokenStorage.shared.save(token: loginResponse.refreshToken, identifier: "refreshToken")
+
+        SecureLogger.logAuthenticationEvent("login", success: true)
         return !loginResponse.accessToken.isEmpty
-
     }
 
     func validateToken() async throws -> Bool {
@@ -29,8 +50,10 @@ struct AuthenticationViewModel{
             _ = try await httpClient.getUserProfile()
             return true
         } catch {
-            TokenStorage.shared.remove(identifier: "accessToken")
-            TokenStorage.shared.remove(identifier: "refreshToken")
+            // ✅ SECURE: Clearing tokens from Keychain
+            SecureTokenStorage.shared.remove(identifier: "accessToken")
+            SecureTokenStorage.shared.remove(identifier: "refreshToken")
+            Logger.log("Invalid token - cleared from secure storage", level: .warning)
             return false
         }
     }

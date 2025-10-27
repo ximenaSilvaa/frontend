@@ -283,20 +283,22 @@ struct HTTPClient: HTTPClientProtocol {
         guard let url = URL(string: URLEndpoints.login) else {
             throw NetworkError.invalidURL
         }
-        
+
         let body = UserLoginRequest(email: email, password: password, type: "mobile")
         let request = try buildRequest(
             url: url,
             method: .post,
             body: body
         )
-        
-        Logger.log("Attempting login for user: \(email)", level: .debug)
-        
+
+        // ✅ SECURE: Use SecureLogger to avoid exposing PII (email)
+        SecureLogger.logAuthenticationEvent("login", success: false)
+
         let response = try await performRequest(request, expecting: UserLoginResponse.self)
-        
-        Logger.log("Login successful", level: .info)
-        
+
+        // ✅ SECURE: Log success without exposing user data
+        SecureLogger.logAuthenticationEvent("login", success: true)
+
         return response
     }
     
@@ -304,26 +306,28 @@ struct HTTPClient: HTTPClientProtocol {
         guard let url = URL(string: URLEndpoints.register) else {
             throw NetworkError.invalidURL
         }
-        
+
         let body = UserRequest(
             email: email,
             name: name,
             password: password,
             role_id: "1"
         )
-        
+
         let request = try buildRequest(
             url: url,
             method: .post,
             body: body
         )
-        
-        Logger.log("Attempting registration for user: \(email)", level: .debug)
-        
+
+        // ✅ SECURE: Do not expose email or personal details
+        SecureLogger.logAuthenticationEvent("register", success: false)
+
         let response = try await performRequest(request, expecting: RegisterResponse.self)
-        
-        Logger.log("Registration successful for user: \(response.user.name) (ID: \(response.user.id))", level: .info)
-        
+
+        // ✅ SECURE: Log success without exposing PII
+        SecureLogger.logAuthenticationEvent("register", success: true)
+
         return response
     }
     
@@ -672,24 +676,27 @@ struct HTTPClient: HTTPClientProtocol {
 }
 
 // MARK: - TokenStorage Implementation
+// DEPRECATED: Use SecureTokenStorage instead!
+// This class is kept for backward compatibility only.
+// TokenStorageProtocol.shared will use SecureTokenStorage automatically.
 
+// IMPORTANT: TokenStorageProtocol.shared now returns SecureTokenStorage.shared
+// which uses iOS Keychain instead of insecure UserDefaults
+@available(*, deprecated, message: "Use SecureTokenStorage.shared instead")
 class TokenStorage: TokenStorageProtocol {
-    static let shared = TokenStorage()
-    
+    static let shared: TokenStorageProtocol = SecureTokenStorage.shared
+
     private init() {}
-    
+
     func get(identifier: String) -> String? {
-        // Original implementation - replace with your actual implementation
-        return UserDefaults.standard.string(forKey: identifier)
+        return SecureTokenStorage.shared.get(identifier: identifier)
     }
-    
+
     func save(token: String, identifier: String) {
-        UserDefaults.standard.set(token, forKey: identifier)
+        SecureTokenStorage.shared.save(token: token, identifier: identifier)
     }
-    
+
     func remove(identifier: String) {
-        UserDefaults.standard.removeObject(forKey: identifier)
+        SecureTokenStorage.shared.remove(identifier: identifier)
     }
-    
-    
 }

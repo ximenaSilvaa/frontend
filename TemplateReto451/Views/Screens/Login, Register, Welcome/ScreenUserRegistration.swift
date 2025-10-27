@@ -134,7 +134,7 @@ struct ScreenUserRegistration: View {
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.brandPrimary)
 
-                                SecureFieldWithToggle(placeholder: "Contraseña", text: $userForm.password)
+                                SecurePasswordField(placeholder: "Contraseña", password: $userForm.password)
                             }
 
                             // Confirm Password Field
@@ -143,7 +143,7 @@ struct ScreenUserRegistration: View {
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.brandPrimary)
 
-                                SecureFieldWithToggle(placeholder: "Contraseña", text: $userForm.confirmPassword)
+                                SecurePasswordField(placeholder: "Confirmar Contraseña", password: $userForm.confirmPassword)
                             }
                         }
                         .padding(.horizontal, 32)
@@ -290,6 +290,8 @@ struct ScreenUserRegistration: View {
         } message: {
             Text("Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesión.")
         }
+        // ✅ SECURITY: Prevent screenshot and app switcher visibility
+        .privacySensitive()
     }
 }
 

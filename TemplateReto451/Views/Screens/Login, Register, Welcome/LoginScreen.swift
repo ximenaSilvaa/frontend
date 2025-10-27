@@ -91,7 +91,7 @@ struct LoginScreen: View {
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.brandPrimary)
 
-                                SecureFieldWithToggle(placeholder: "Contraseña", text: $password)
+                                SecurePasswordField(placeholder: "Contraseña", password: $password)
                             }
                         }
                         .padding(.horizontal, 32)
@@ -188,6 +188,8 @@ struct LoginScreen: View {
             }
         }
         .navigationBarHidden(true)
+        // ✅ SECURITY: Prevent screenshot and app switcher visibility
+        .privacySensitive()
     }
 }
 
