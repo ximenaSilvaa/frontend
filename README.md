@@ -1,21 +1,159 @@
-# TemplateReto451 - Aplicación iOS de Autenticación
+# TemplateReto451 - Plataforma de Reportes de Fraude Cibernético
 
 ## Descripción General del Proyecto
 
-TemplateReto451 es una aplicación iOS segura de autenticación construida con SwiftUI, implementando medidas de seguridad comprehensivas alineadas con el Estándar de Verificación de Seguridad de Aplicaciones Móviles OWASP (MASVS). La aplicación proporciona funcionalidad de registro de usuarios, inicio de sesión y gestión de perfiles con protecciones de seguridad de nivel empresarial.
+TemplateReto451 es una aplicación iOS de seguridad comunitaria diseñada para reportar y documentar sitios web fraudulentos, estafas cibernéticas y amenazas en línea. Construida con SwiftUI, implementa medidas de seguridad comprehensivas alineadas con el Estándar de Verificación de Seguridad de Aplicaciones Móviles OWASP (MASVS).
+
+La aplicación permite a usuarios registrarse, autenticarse y crear reportes detallados sobre sitios web sospechosos para ayudar a la comunidad a identificar y evitar fraudes. La plataforma centraliza la información de reportes en un dashboard con estadísticas y análisis en tiempo real.
+
+## Características Principales
+
+### Sistema de Reportes
+
+La plataforma permite a los usuarios crear reportes detallados sobre:
+
+1. **Sitios Web Fraudulentos**
+   - Phishing y suplantación de identidad
+   - Estafas bancarias en línea
+   - Solicitud de datos sensibles sin protección
+   - Redirecciones a páginas falsas
+
+2. **Información del Reporte**
+   - Título descriptivo del incidente
+   - Descripción detallada del fraude
+   - URL del sitio sospechoso
+   - Evidencia fotográfica/captura de pantalla
+   - Categorización por tipo de amenaza
+   - Opción de reporte anónimo
+
+3. **Estados de Reporte**
+   - Pendiente de revisión
+   - En verificación
+   - Confirmado
+   - Resuelto
+   - Falso positivo
+
+### Dashboard de Estadísticas
+
+- Visualización de reportes recientes
+- Listado de amenazas más reportadas del mes
+- Alertas de seguridad para la comunidad
+- Métricas de reportes por categoría
+
+### Notificaciones
+
+- Alertas de nuevas amenazas reportadas
+- Actualizaciones de estado de reportes enviados
+- Notificaciones de seguridad crítica
+
+### Gestión de Perfil
+
+- Registro seguro de usuarios
+- Gestión de información personal
+- Configuración de privacidad
+- Historial de reportes enviados
+- Preferencias de notificaciones
+
+### Autenticación Segura
+
+- Registro con validación de correo electrónico
+- Inicio de sesión basado en tokens JWT
+- Recuperación segura de contraseñas
+- Protección contra ataques de fuerza bruta
 
 ## Tabla de Contenidos
 
-1. [Requisitos del Sistema](#requisitos-del-sistema)
-2. [Instalación](#instalación)
-3. [Arquitectura](#arquitectura)
-4. [Implementación de Seguridad](#implementación-de-seguridad)
-5. [Integración de API](#integración-de-api)
-6. [Estructura del Proyecto](#estructura-del-proyecto)
-7. [Flujo de Desarrollo](#flujo-de-desarrollo)
-8. [Pruebas](#pruebas)
-9. [Contribuciones](#contribuciones)
-10. [Licencia](#licencia)
+1. [Características Principales](#características-principales)
+2. [Casos de Uso](#casos-de-uso)
+3. [Tipos de Amenazas Reportables](#tipos-de-amenazas-reportables)
+4. [Requisitos del Sistema](#requisitos-del-sistema)
+5. [Instalación](#instalación)
+6. [Arquitectura](#arquitectura)
+7. [Implementación de Seguridad](#implementación-de-seguridad)
+8. [Integración de API](#integración-de-api)
+9. [Estructura del Proyecto](#estructura-del-proyecto)
+10. [Flujo de Desarrollo](#flujo-de-desarrollo)
+11. [Pruebas](#pruebas)
+12. [Contribuciones](#contribuciones)
+13. [Licencia](#licencia)
+
+## Casos de Uso
+
+### Escenario 1: Usuario Detecta Phishing
+
+Un usuario recibe un correo electrónico que parece ser de su banco, pero el sitio web parece sospechoso. Abre la aplicación TemplateReto451, crea un nuevo reporte:
+1. Toma una captura de pantalla del sitio fraudulento
+2. Proporciona la URL sospechosa
+3. Categoriza como "Phishing Bancario"
+4. Selecciona permanecer anónimo
+5. Envía el reporte a la plataforma
+
+El reporte se agrega a la base de datos de amenazas conocidas, alertando a otros usuarios potenciales.
+
+### Escenario 2: Usuario Revisa Amenazas Actuales
+
+Un usuario abre la aplicación y consulta el Dashboard para:
+1. Ver las amenazas más reportadas este mes
+2. Revisar alertas recientes de seguridad
+3. Entender qué tipos de estafas son más comunes
+4. Consultar sus propios reportes anteriores
+
+Esta información educativa ayuda al usuario a protegerse mejor en línea.
+
+### Escenario 3: Administrador Verifica Reportes
+
+Un administrador de la plataforma accede a los reportes pendientes:
+1. Revisa cada reporte nuevo
+2. Verifica la legitimidad de la amenaza
+3. Categoriza correctamente si es necesario
+4. Actualiza el estado del reporte (Confirmado/Falso positivo)
+5. Las alertas se envían a usuarios suscritos
+
+### Impacto Comunitario
+
+- **Educación**: Usuarios aprenden a identificar fraudes comunes
+- **Prevención**: La comunidad se protege mutuamente compartiendo información
+- **Reporte Seguro**: Los usuarios pueden reportar anónimamente sin temor
+- **Bases de Datos de Amenazas**: Se construye un registro centralizado de sitios maliciosos
+
+## Tipos de Amenazas Reportables
+
+### Categorías de Fraude
+
+1. **Phishing y Suplantación de Identidad**
+   - Sitios que imitan bancos legítimos
+   - Correos falsos solicitando credenciales
+   - Redirecciones a páginas de login falsas
+
+2. **Estafas Financieras**
+   - Solicitud de datos bancarios sin protección
+   - Transferencias de dinero fraudulentas
+   - Promesas de inversiones falsas
+
+3. **Robo de Identidad**
+   - Solicitud de información personal
+   - Documentos de identidad falsificados
+   - Venta de datos personales
+
+4. **Malware y Software Malicioso**
+   - Descargas de software infectado
+   - Distribución de virus
+   - Ransomware
+
+5. **Redes Sociales y Relaciones Falsas**
+   - Perfiles falsos de celebridades
+   - Romance scams
+   - Solicitud de dinero en línea
+
+6. **Estafas de Comercio Electrónico**
+   - Tiendas online falsas
+   - Productos no entregados
+   - Cobros no autorizados
+
+7. **Otras Amenazas**
+   - Acoso cibernético
+   - Contenido ilegal
+   - Violación de privacidad
 
 ## Requisitos del Sistema
 
@@ -170,6 +308,8 @@ La aplicación se comunica con una API de backend para autenticación de usuario
 
 ### Métodos Implementados
 
+#### Autenticación de Usuarios
+
 1. **Registro de Usuario**
    - Punto final: POST /users/register
    - Carga útil: nombre, correo electrónico, contraseña
@@ -189,6 +329,52 @@ La aplicación se comunica con una API de backend para autenticación de usuario
    - Punto final: POST /auth/refresh
    - Carga útil: refreshToken
    - Respuesta: Nuevo accessToken
+
+#### Gestión de Reportes
+
+5. **Crear Reporte**
+   - Punto final: POST /reports/create
+   - Carga útil: título, descripción, URL, categoría, imagen, es_anónimo
+   - Respuesta: Confirmación de reporte creado
+
+6. **Obtener Reportes del Usuario**
+   - Punto final: GET /reports/user
+   - Encabezados: Authorization (Bearer token)
+   - Respuesta: Lista de reportes enviados por el usuario
+
+7. **Obtener Todos los Reportes**
+   - Punto final: GET /reports/all
+   - Encabezados: Authorization (Bearer token)
+   - Respuesta: Lista paginada de reportes verificados
+
+8. **Subir Imagen de Reporte**
+   - Punto final: POST /upload/report-image
+   - Carga útil: Datos de imagen (multipart/form-data)
+   - Respuesta: Ruta de la imagen almacenada
+
+#### Dashboard y Estadísticas
+
+9. **Obtener Dashboard**
+   - Punto final: GET /dashboard
+   - Encabezados: Authorization (Bearer token)
+   - Respuesta: Alertas recientes, reportes principales del mes
+
+10. **Obtener Categorías**
+    - Punto final: GET /categories
+    - Encabezados: Authorization (Bearer token)
+    - Respuesta: Lista de categorías de reportes disponibles
+
+#### Notificaciones
+
+11. **Obtener Notificaciones**
+    - Punto final: GET /notifications
+    - Encabezados: Authorization (Bearer token)
+    - Respuesta: Lista de notificaciones del usuario
+
+12. **Obtener Configuración de Notificaciones**
+    - Punto final: GET /settings/notifications
+    - Encabezados: Authorization (Bearer token)
+    - Respuesta: Preferencias de notificaciones del usuario
 
 ### Manejo de Errores
 
@@ -214,24 +400,55 @@ TemplateReto451/
 ├── Networking/
 │   ├── HTTPClient.swift                  (Comunicación API)
 │   ├── URLEndpoints.swift                (Puntos finales API)
-│   └── Models/
-│       ├── UserLoginResponse.swift
-│       ├── RegisterResponse.swift
-│       └── [Otros DTOs]
+│   ├── Models/
+│   │   ├── UserLoginResponse.swift
+│   │   ├── RegisterResponse.swift
+│   │   ├── ReportDTO.swift               (Modelo de reportes)
+│   │   ├── DashboardDTO.swift            (Datos del dashboard)
+│   │   ├── NotificationDTO.swift         (Notificaciones)
+│   │   ├── CategoryDTO.swift             (Categorías de reportes)
+│   │   └── [Otros DTOs]
+│   └── Protocol/
+│       └── HTTPClientProtocol.swift      (Interfaz de red)
 │
 ├── ViewModels/
-│   └── AuthenticationViewModel.swift     (Lógica de autenticación)
+│   ├── AuthenticationViewModel.swift     (Lógica de autenticación)
+│   ├── CreateReportViewModel.swift       (Creación de reportes)
+│   ├── DashboardViewModel.swift          (Estadísticas y alertas)
+│   ├── NotificationsViewModel.swift      (Gestión de notificaciones)
+│   └── NotificationSettingsViewModel.swift (Configuración de notificaciones)
 │
 ├── Views/
 │   ├── Screens/
-│   │   └── Login, Register, Welcome/
-│   │       ├── LoginScreen.swift
-│   │       ├── ScreenUserRegistration.swift
-│   │       └── WelcomeScreen.swift
+│   │   ├── Login, Register, Welcome/
+│   │   │   ├── LoginScreen.swift
+│   │   │   ├── ScreenUserRegistration.swift
+│   │   │   └── WelcomeScreen.swift
+│   │   │
+│   │   ├── DashboardScreen.swift         (Pantalla principal con estadísticas)
+│   │   │
+│   │   ├── Profile/
+│   │   │   ├── UserAllReportsScreen.swift (Reportes del usuario)
+│   │   │   ├── ProfileScreen.swift
+│   │   │   └── [Otras pantallas de perfil]
+│   │   │
+│   │   ├── Reports/
+│   │   │   ├── CreateReportScreen.swift   (Crear nuevo reporte)
+│   │   │   ├── ReportDetailScreen.swift   (Detalle de reporte)
+│   │   │   └── [Pantallas de reportes]
+│   │   │
+│   │   ├── Notifications/
+│   │   │   ├── NotificationsScreen.swift
+│   │   │   └── ScreenNotificationSettings.swift
+│   │   │
+│   │   └── Settings/
+│   │       └── [Pantallas de configuración]
 │   │
 │   ├── Components/
 │   │   ├── SecurePasswordField.swift     (Entrada segura de contraseña)
-│   │   ├── SecureFieldWithToggle.swift   (Deprecado)
+│   │   ├── SecureFieldWithToggle.swift   (Deprecated)
+│   │   ├── ReportCard.swift              (Tarjeta de reporte)
+│   │   ├── AlertCard.swift               (Tarjeta de alerta)
 │   │   └── [Otros componentes UI]
 │   │
 │   └── Modifiers/
@@ -249,7 +466,8 @@ TemplateReto451/
 │
 └── Documentation/
     ├── SECURITY_FIX_TOKEN_STORAGE.md
-    └── SECURITY_FIX_PII_LOGGING.md
+    ├── SECURITY_FIX_PII_LOGGING.md
+    └── SECURITY_FIX_PASSWORD_MEMORY.md
 ```
 
 ## Flujo de Desarrollo
